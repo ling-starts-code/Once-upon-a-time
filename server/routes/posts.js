@@ -8,8 +8,8 @@ const router = express.Router()
 router.post('/', (req, res) => {
   const sentence = req.body
   db.addSentence(sentence)
-    .then((sentence) => {
-      res.json(sentence)
+    .then(() => {
+      res.json({ sentence })
       // res.json({ fruits: results.map((fruit) => fruit.name) })
     })
     .catch((err) => {

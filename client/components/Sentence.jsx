@@ -4,10 +4,14 @@ import { sendSentence } from '../actions'
 
 function Sentence() {
   const [sentence, setSentence] = useState('')
+
+  // --------------------STEP 1--------------------declaring dispatch function
   const dispatch = useDispatch()
 
   function handleClick() {
     console.log('handle clicked')
+
+    // ---------------------STEP 2------------------- running the dispatch function with sendSentence passing through useState sentence. sendSentence is in actions/index.js --{ACTIONS}--
     dispatch(sendSentence(sentence))
 
     //send data and addfunction to fetch last string of post}
