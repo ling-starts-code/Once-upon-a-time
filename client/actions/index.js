@@ -1,18 +1,19 @@
-import { getFruits } from '../apis/fruits'
+import { saveSentences } from '../apis/apiClient'
 
-export const SET_FRUITS = 'SET_FRUITS'
+export const ADD_SENTENCE = 'ADD_SENTENCE'
 
-export function setFruits(fruits) {
+//add sentence
+export function addSentence(para) {
   return {
-    type: SET_FRUITS,
-    payload: fruits,
+    type: ADD_SENTENCE,
+    payload: para,
   }
 }
 
-export function fetchFruits() {
+export function sendSentence(sentence) {
   return (dispatch) => {
-    return getFruits().then((fruits) => {
-      dispatch(setFruits(fruits))
+    return saveSentences(sentence).then((para) => {
+      dispatch(addSentence(para))
     })
   }
 }
