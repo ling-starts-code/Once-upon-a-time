@@ -8,7 +8,12 @@ function getAllSentence(db = connection) {
   return db('post').select()
 }
 
+function deleteAllSentences(db = connection) {
+  return db('post').del()
+}
+
 module.exports = {
   addSentence,
   getAllSentence,
+  deleteAllSentences,
 }
