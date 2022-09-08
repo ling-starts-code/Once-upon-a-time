@@ -8,6 +8,7 @@ export function saveSentences(sentence) {
     .post(rootUrl + '/sentence')
     .send({ sentence })
     .then((res) => {
+      console.log(res.body)
       return res.body
     })
 }
