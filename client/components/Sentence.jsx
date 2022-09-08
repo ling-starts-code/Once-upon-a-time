@@ -4,9 +4,12 @@ import { sendSentence } from '../actions'
 
 function Sentence() {
   const [sentence, setSentence] = useState('')
+  // const fruits = useSelector((state) => state.sentence)
 
   // --------------------STEP 1--------------------declaring dispatch function
   const dispatch = useDispatch()
+
+  // const
 
   function handleClick() {
     console.log('handle clicked')
