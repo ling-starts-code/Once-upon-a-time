@@ -18,4 +18,29 @@ router.post('/', (req, res) => {
     })
 })
 
+router.get('/', (req, res) => {
+  db.getAllSentence()
+    .then((result) => {
+      console.log('result', result)
+      res.json(result)
+    })
+    .catch((err) => {
+      console.log(err)
+      res.status(500).json({ message: 'Something went wrong' })
+    })
+})
+
+router.delete('/', (req, res) => {
+  // const sentences = req.body
+
+  db.deleteAllSentences()
+    .then(() => {
+      res.json()
+    })
+    .catch((err) => {
+      console.log(err)
+      res.status(500).json({ message: 'Something went wrong' })
+    })
+})
+
 module.exports = router
