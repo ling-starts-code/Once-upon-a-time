@@ -17,7 +17,7 @@ function SentencePrompt() {
 
     const words = arr.sentence.post.split(' ')
 
-    words.splice(0, words.length - 6)
+    words.splice(0, words.length - 5)
     let wordPrompt = words.join(' ')
     setPrompt(wordPrompt)
   }

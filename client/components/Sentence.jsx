@@ -11,11 +11,12 @@ function Sentence() {
 
   // const
 
-  function handleClick() {
+  function handleClick(event) {
     console.log('handle clicked')
-
-    // ---------------------STEP 2------------------- running the dispatch function with sendSentence passing through useState sentence. sendSentence is in actions/index.js --{ACTIONS}--
+    event.preventDefault()
     dispatch(sendSentence(sentence))
+    setSentence('')
+    // ---------------------STEP 2------------------- running the dispatch function with sendSentence passing through useState sentence. sendSentence is in actions/index.js --{ACTIONS}--
 
     //send data and addfunction to fetch last string of post}
   }
@@ -29,9 +30,17 @@ function Sentence() {
       <form action="submit">
         <label htmlFor="name"> </label>
 
-        <input id="name" onChange={handleChange} value={sentence} name="name" />
+        <input
+          id="name"
+          onChange={handleChange}
+          value={sentence}
+          name="name"
+          onKeyPress={(e) => {
+            e.key === 'Enter' && handleClick
+          }}
+        />
+        <button onClick={handleClick}>Submit</button>
       </form>
-      <button onClick={handleClick}>Submit</button>
     </div>
   )
 }
