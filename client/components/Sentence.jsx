@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { sendSentence, deleteAll } from '../actions'
+import { sendSentence, deleteAll, getAll } from '../actions'
+import WholeStory from './WholeStory'
 
 function Sentence() {
   const [sentence, setSentence] = useState('')
@@ -33,6 +34,12 @@ function Sentence() {
     setSentence(value) // spread (...) allows us to keep all the data that was there, but update/over-write the part that has changed.
   }
 
+  function readStory(event) {
+    event.preventDefault()
+    setShowstory(true)
+    dispatch(getAll())
+  }
+
   return (
     <div>
       <form className="form" action="submit">
@@ -55,16 +62,18 @@ function Sentence() {
         )}
         {!showStory && (
           <button
-            onClick={(e) => {
-              e.preventDefault()
-              setShowstory(true)
-            }}
+            onClick={readStory}
+            // onClick={(e) => {
+            //   e.preventDefault()
+            //   setShowstory(true)
+            // }}
           >
             Read Story
           </button>
         )}
         {showStory && <button onClick={handleDelete}>Start Again</button>}
       </form>
+      {showStory && <WholeStory />}
     </div>
   )
 }
