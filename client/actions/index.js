@@ -1,12 +1,19 @@
-import { saveSentences } from '../apis/apiClient'
+import { saveSentences, deleteAllSentences } from '../apis/apiClient'
 
 export const ADD_SENTENCE = 'ADD_SENTENCE'
+export const DELETE_SENTENCES = 'DELETE_SENTENCES'
 
 // -----------------STEP 4----------------------- returns the type and payload with the para (sentence) then moves over to reducers/index.js then to reducers/sentences --{REDUCERS}--
 export function addSentence(para) {
   return {
     type: ADD_SENTENCE,
     payload: para,
+  }
+}
+
+export function deleteSentences() {
+  return {
+    type: DELETE_SENTENCES,
   }
 }
 
@@ -17,6 +24,14 @@ export function sendSentence(sentence) {
   return (dispatch) => {
     return saveSentences(sentence).then((para) => {
       dispatch(addSentence(para))
+    })
+  }
+}
+
+export function deleteAll() {
+  return (dispatch) => {
+    return deleteAllSentences().then(() => {
+      dispatch(deleteSentences())
     })
   }
 }

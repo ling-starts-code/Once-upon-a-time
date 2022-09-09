@@ -1,4 +1,4 @@
-import { ADD_SENTENCE } from '../actions'
+import { ADD_SENTENCE, DELETE_SENTENCES } from '../actions'
 
 const initialState = { sentence: { post: 'Once upon a time...' } }
 
@@ -8,6 +8,8 @@ const reducer = (state = initialState, action) => {
   switch (type) {
     case ADD_SENTENCE:
       return payload
+    case DELETE_SENTENCES:
+      return initialState
     default:
       return state
   }
