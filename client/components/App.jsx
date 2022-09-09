@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 
 // import { fetchFruits } from '../actions'
 import Sentence from './Sentence'
+import SentencePrompt from './SentencePrompt'
 
 function App() {
   // const fruits = useSelector((state) => state.fruits)
@@ -16,12 +17,13 @@ function App() {
   return (
     <>
       <div className="app">
-        <h1>Fullstack Boilerplate - with Fruits!</h1>
+        <h1>A Fairytale - with Fruits!</h1>
         <ul>
           {/* {fruits.map((fruit) => (
             <li key={fruit}>{fruit}</li>
           ))} */}
         </ul>
+        <SentencePrompt />
         <Sentence />
       </div>
     </>

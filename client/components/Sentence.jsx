@@ -27,7 +27,7 @@ function Sentence() {
   return (
     <div>
       <form action="submit">
-        <label htmlFor="name">Once upon a time...</label>
+        <label htmlFor="name"> </label>
 
         <input id="name" onChange={handleChange} value={sentence} name="name" />
       </form>
