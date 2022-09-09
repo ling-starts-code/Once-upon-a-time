@@ -14,3 +14,10 @@ export function saveSentences(post) {
       return res.body
     })
 }
+
+export function deleteAllSentences() {
+  return request.delete(rootUrl + '/posts').then((res) => {
+    console.log('delete', res.body)
+    return res.body
+  })
+}
