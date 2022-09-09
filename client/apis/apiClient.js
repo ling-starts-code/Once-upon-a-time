@@ -21,3 +21,9 @@ export function deleteAllSentences() {
     return res.body
   })
 }
+export function getAllSentences() {
+  return request.get(rootUrl + '/posts').then((res) => {
+    console.log('add', res.body)
+    return res.body
+  })
+}
