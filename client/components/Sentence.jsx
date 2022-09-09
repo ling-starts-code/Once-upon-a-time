@@ -35,12 +35,13 @@ function Sentence() {
 
   return (
     <div>
-      <form action="submit">
+      <form className="form" action="submit">
         {!showStory && (
           <>
             <label htmlFor="name"> </label>
 
-            <input
+            <textarea
+              type="text"
               id="name"
               onChange={handleChange}
               value={sentence}

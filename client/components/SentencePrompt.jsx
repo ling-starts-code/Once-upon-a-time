@@ -22,7 +22,11 @@ function SentencePrompt() {
     setPrompt(wordPrompt)
   }
 
-  return <div>{prompt}</div>
+  return (
+    <div>
+      <h2>{prompt}</h2>
+    </div>
+  )
 }
 
 export default SentencePrompt
