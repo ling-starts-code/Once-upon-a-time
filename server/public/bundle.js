@@ -39433,7 +39433,6 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-var __webpack_exports__ = {};
 /*!*************************!*\
   !*** ./client/index.js ***!
   \*************************/
@@ -39453,17 +39452,6 @@ document.addEventListener('DOMContentLoaded', () => {
     store: _store__WEBPACK_IMPORTED_MODULE_3__["default"]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_components_App__WEBPACK_IMPORTED_MODULE_4__["default"], null)), document.getElementById('app'));
 });
-})();
-
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-/*!**********************************!*\
-  !*** ./client/styles/index.scss ***!
-  \**********************************/
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
 })();
 
 /******/ })()
