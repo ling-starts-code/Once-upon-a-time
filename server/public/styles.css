@@ -1,0 +1,55 @@
+/*!*******************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./client/styles/index.scss ***!
+  \*******************************************************************************************************************/
+@import url(https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap);
+/*!***********************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./client/styles/index.scss (1) ***!
+  \***********************************************************************************************************************/
+
+body {
+  margin:0;
+  padding:0;
+  font-family: 'Aclonica', sans-serif;
+  /* background-color: aqua; */
+  background-image: url('./scroll2.webp');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#name {
+  height: 200px;
+  width: 400px;
+}
+
+button {
+  margin: 6px;
+  padding: 10px;
+  border-radius: 15px;
+
+}
+
+textarea {
+  font-family: 'Aclonica', sans-serif;
+  word-wrap: break-word;
+  word-break: break-all;
+  padding: 20px;
+
+}
+
+/*# sourceMappingURL=styles.css.map*/

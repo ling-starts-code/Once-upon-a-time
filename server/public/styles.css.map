@@ -1,0 +1,1 @@
+{"version":3,"file":"styles.css","mappings":";;;;;;;AAEA;;EAEE;AAAF,C","sources":["webpack://boilerplate-fullstack-scss/./client/styles/index.scss"],"sourcesContent":["@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap');\n\nhtml, \nbody {\n  font-family: 'Montserrat', sans-serif;\n}\n"],"names":[],"sourceRoot":""}
