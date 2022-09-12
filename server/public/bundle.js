@@ -291,17 +291,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_say__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-say */ "./node_modules/react-say/lib/index.js");
+
 
 
 
 function WholeStory() {
   const arr = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.paragraphies);
-  console.log(arr);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, arr.map(item => {
+  console.log('arr on line 7 ', arr);
+  const story = arr.reduce((item, current) => {
+    console.log('current post: ', current.post);
+    return item + ' ' + current.post;
+  }, '');
+  console.log('line 13 story ', story);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, arr.map(item => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", {
       key: item.id
     }, item.post);
-  }));
+  }), story && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_say__WEBPACK_IMPORTED_MODULE_2__.SayButton, {
+    onClick: event => console.log(event),
+    speak: story
+  }, "Read Me")));
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WholeStory);
@@ -32684,6 +32694,1758 @@ function warning(message) {
 
 /***/ }),
 
+/***/ "./node_modules/react-say/lib/Composer.js":
+/*!************************************************!*\
+  !*** ./node_modules/react-say/lib/Composer.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/slicedToArray.js"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+
+var _Context = _interopRequireDefault(__webpack_require__(/*! ./Context */ "./node_modules/react-say/lib/Context.js"));
+
+var _createSynthesize = _interopRequireDefault(__webpack_require__(/*! ./createSynthesize */ "./node_modules/react-say/lib/createSynthesize.js"));
+
+var _migrateDeprecatedProps = _interopRequireDefault(__webpack_require__(/*! ./migrateDeprecatedProps */ "./node_modules/react-say/lib/migrateDeprecatedProps.js"));
+
+var _useEvent = _interopRequireDefault(__webpack_require__(/*! ./useEvent */ "./node_modules/react-say/lib/useEvent.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+var Composer = function Composer(props) {
+  var _migrateDeprecatedPro = (0, _migrateDeprecatedProps["default"])(props, Composer),
+      children = _migrateDeprecatedPro.children,
+      ponyfillFromProps = _migrateDeprecatedPro.ponyfill; // If we have the parent context, we will use that synthesize() function and its internal queue.
+
+
+  var _ref = (0, _react.useContext)(_Context["default"]) || {},
+      parentPonyfill = _ref.ponyfill,
+      parentSynthesize = _ref.synthesize;
+
+  var ponyfill = ponyfillFromProps || parentPonyfill || {
+    speechSynthesis: window.speechSynthesis || window.webkitSpeechSynthesis,
+    SpeechSynthesisUtterance: window.SpeechSynthesisUtterance || window.webkitSpeechSynthesisUtterance
+  }; // If the parent context changed and no longer has a synthesize() function, we will create the queue.
+  // This is very unlikely to happen.
+
+  var synthesize = (0, _react.useMemo)(function () {
+    return parentSynthesize || (0, _createSynthesize["default"])();
+  }, [parentSynthesize]);
+  var speechSynthesis = ponyfill.speechSynthesis;
+
+  var _useState = (0, _react.useState)(speechSynthesis.getVoices()),
+      _useState2 = (0, _slicedToArray2["default"])(_useState, 2),
+      voices = _useState2[0],
+      setVoices = _useState2[1];
+
+  (0, _useEvent["default"])(speechSynthesis, 'voiceschanged', function () {
+    return setVoices(speechSynthesis.getVoices());
+  });
+  var context = (0, _react.useMemo)(function () {
+    return {
+      ponyfill: ponyfill,
+      synthesize: synthesize,
+      voices: voices
+    };
+  }, [ponyfill, synthesize, voices]);
+  return /*#__PURE__*/_react["default"].createElement(_Context["default"].Provider, {
+    value: context
+  }, typeof children === 'function' ? /*#__PURE__*/_react["default"].createElement(_Context["default"].Consumer, null, function (context) {
+    return children(context);
+  }) : children);
+};
+
+Composer.defaultProps = {
+  children: undefined,
+  ponyfill: undefined
+};
+Composer.propTypes = {
+  children: _propTypes["default"].any,
+  ponyfill: _propTypes["default"].shape({
+    speechSynthesis: _propTypes["default"].any,
+    SpeechSynthesisUtterance: _propTypes["default"].any
+  })
+};
+var _default = Composer;
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9Db21wb3Nlci5qcyJdLCJuYW1lcyI6WyJDb21wb3NlciIsInByb3BzIiwiY2hpbGRyZW4iLCJwb255ZmlsbEZyb21Qcm9wcyIsInBvbnlmaWxsIiwiQ29udGV4dCIsInBhcmVudFBvbnlmaWxsIiwicGFyZW50U3ludGhlc2l6ZSIsInN5bnRoZXNpemUiLCJzcGVlY2hTeW50aGVzaXMiLCJ3aW5kb3ciLCJ3ZWJraXRTcGVlY2hTeW50aGVzaXMiLCJTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UiLCJ3ZWJraXRTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UiLCJnZXRWb2ljZXMiLCJ2b2ljZXMiLCJzZXRWb2ljZXMiLCJjb250ZXh0IiwiZGVmYXVsdFByb3BzIiwidW5kZWZpbmVkIiwicHJvcFR5cGVzIiwiUHJvcFR5cGVzIiwiYW55Iiwic2hhcGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7QUFBQTs7QUFDQTs7QUFFQTs7QUFDQTs7QUFDQTs7QUFDQTs7Ozs7O0FBRUEsSUFBTUEsUUFBUSxHQUFHLFNBQVhBLFFBQVcsQ0FBQUMsS0FBSyxFQUFJO0FBQ3hCLDhCQUFrRCx3Q0FBdUJBLEtBQXZCLEVBQThCRCxRQUE5QixDQUFsRDtBQUFBLE1BQVFFLFFBQVIseUJBQVFBLFFBQVI7QUFBQSxNQUE0QkMsaUJBQTVCLHlCQUFrQkMsUUFBbEIsQ0FEd0IsQ0FHeEI7OztBQUNBLGFBQW1FLHVCQUFXQyxtQkFBWCxLQUF1QixFQUExRjtBQUFBLE1BQWtCQyxjQUFsQixRQUFRRixRQUFSO0FBQUEsTUFBOENHLGdCQUE5QyxRQUFrQ0MsVUFBbEM7O0FBRUEsTUFBTUosUUFBUSxHQUFHRCxpQkFBaUIsSUFBSUcsY0FBckIsSUFBdUM7QUFDdERHLElBQUFBLGVBQWUsRUFBRUMsTUFBTSxDQUFDRCxlQUFQLElBQTBCQyxNQUFNLENBQUNDLHFCQURJO0FBRXREQyxJQUFBQSx3QkFBd0IsRUFBRUYsTUFBTSxDQUFDRSx3QkFBUCxJQUFtQ0YsTUFBTSxDQUFDRztBQUZkLEdBQXhELENBTndCLENBV3hCO0FBQ0E7O0FBQ0EsTUFBTUwsVUFBVSxHQUFHLG9CQUFRO0FBQUEsV0FBTUQsZ0JBQWdCLElBQUksbUNBQTFCO0FBQUEsR0FBUixFQUFzRCxDQUFDQSxnQkFBRCxDQUF0RCxDQUFuQjtBQUNBLE1BQVFFLGVBQVIsR0FBNEJMLFFBQTVCLENBQVFLLGVBQVI7O0FBQ0Esa0JBQTRCLHFCQUFTQSxlQUFlLENBQUNLLFNBQWhCLEVBQVQsQ0FBNUI7QUFBQTtBQUFBLE1BQU9DLE1BQVA7QUFBQSxNQUFlQyxTQUFmOztBQUVBLDRCQUFTUCxlQUFULEVBQTBCLGVBQTFCLEVBQTJDO0FBQUEsV0FBTU8sU0FBUyxDQUFDUCxlQUFlLENBQUNLLFNBQWhCLEVBQUQsQ0FBZjtBQUFBLEdBQTNDO0FBRUEsTUFBTUcsT0FBTyxHQUFHLG9CQUFRO0FBQUEsV0FBTztBQUM3QmIsTUFBQUEsUUFBUSxFQUFSQSxRQUQ2QjtBQUU3QkksTUFBQUEsVUFBVSxFQUFWQSxVQUY2QjtBQUc3Qk8sTUFBQUEsTUFBTSxFQUFOQTtBQUg2QixLQUFQO0FBQUEsR0FBUixFQUlaLENBQUNYLFFBQUQsRUFBV0ksVUFBWCxFQUF1Qk8sTUFBdkIsQ0FKWSxDQUFoQjtBQU1BLHNCQUNFLGdDQUFDLG1CQUFELENBQVMsUUFBVDtBQUFrQixJQUFBLEtBQUssRUFBR0U7QUFBMUIsS0FFSSxPQUFPZixRQUFQLEtBQW9CLFVBQXBCLGdCQUNFLGdDQUFDLG1CQUFELENBQVMsUUFBVCxRQUNJLFVBQUFlLE9BQU87QUFBQSxXQUFJZixRQUFRLENBQUNlLE9BQUQsQ0FBWjtBQUFBLEdBRFgsQ0FERixHQUtFZixRQVBOLENBREY7QUFZRCxDQXJDRDs7QUF1Q0FGLFFBQVEsQ0FBQ2tCLFlBQVQsR0FBd0I7QUFDdEJoQixFQUFBQSxRQUFRLEVBQUVpQixTQURZO0FBRXRCZixFQUFBQSxRQUFRLEVBQUVlO0FBRlksQ0FBeEI7QUFLQW5CLFFBQVEsQ0FBQ29CLFNBQVQsR0FBcUI7QUFDbkJsQixFQUFBQSxRQUFRLEVBQUVtQixzQkFBVUMsR0FERDtBQUVuQmxCLEVBQUFBLFFBQVEsRUFBRWlCLHNCQUFVRSxLQUFWLENBQWdCO0FBQ3hCZCxJQUFBQSxlQUFlLEVBQUVZLHNCQUFVQyxHQURIO0FBRXhCVixJQUFBQSx3QkFBd0IsRUFBRVMsc0JBQVVDO0FBRlosR0FBaEI7QUFGUyxDQUFyQjtlQVFldEIsUSIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBQcm9wVHlwZXMgZnJvbSAncHJvcC10eXBlcyc7XG5pbXBvcnQgUmVhY3QsIHsgdXNlQ29udGV4dCwgdXNlTWVtbywgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5cbmltcG9ydCBDb250ZXh0IGZyb20gJy4vQ29udGV4dCc7XG5pbXBvcnQgY3JlYXRlU3ludGhlc2l6ZSBmcm9tICcuL2NyZWF0ZVN5bnRoZXNpemUnO1xuaW1wb3J0IG1pZ3JhdGVEZXByZWNhdGVkUHJvcHMgZnJvbSAnLi9taWdyYXRlRGVwcmVjYXRlZFByb3BzJztcbmltcG9ydCB1c2VFdmVudCBmcm9tICcuL3VzZUV2ZW50JztcblxuY29uc3QgQ29tcG9zZXIgPSBwcm9wcyA9PiB7XG4gIGNvbnN0IHsgY2hpbGRyZW4sIHBvbnlmaWxsOiBwb255ZmlsbEZyb21Qcm9wcyB9ID0gbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyhwcm9wcywgQ29tcG9zZXIpO1xuXG4gIC8vIElmIHdlIGhhdmUgdGhlIHBhcmVudCBjb250ZXh0LCB3ZSB3aWxsIHVzZSB0aGF0IHN5bnRoZXNpemUoKSBmdW5jdGlvbiBhbmQgaXRzIGludGVybmFsIHF1ZXVlLlxuICBjb25zdCB7IHBvbnlmaWxsOiBwYXJlbnRQb255ZmlsbCwgc3ludGhlc2l6ZTogcGFyZW50U3ludGhlc2l6ZSB9ID0gdXNlQ29udGV4dChDb250ZXh0KSB8fCB7fTtcblxuICBjb25zdCBwb255ZmlsbCA9IHBvbnlmaWxsRnJvbVByb3BzIHx8IHBhcmVudFBvbnlmaWxsIHx8IHtcbiAgICBzcGVlY2hTeW50aGVzaXM6IHdpbmRvdy5zcGVlY2hTeW50aGVzaXMgfHwgd2luZG93LndlYmtpdFNwZWVjaFN5bnRoZXNpcyxcbiAgICBTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2U6IHdpbmRvdy5TcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UgfHwgd2luZG93LndlYmtpdFNwZWVjaFN5bnRoZXNpc1V0dGVyYW5jZSxcbiAgfTtcblxuICAvLyBJZiB0aGUgcGFyZW50IGNvbnRleHQgY2hhbmdlZCBhbmQgbm8gbG9uZ2VyIGhhcyBhIHN5bnRoZXNpemUoKSBmdW5jdGlvbiwgd2Ugd2lsbCBjcmVhdGUgdGhlIHF1ZXVlLlxuICAvLyBUaGlzIGlzIHZlcnkgdW5saWtlbHkgdG8gaGFwcGVuLlxuICBjb25zdCBzeW50aGVzaXplID0gdXNlTWVtbygoKSA9PiBwYXJlbnRTeW50aGVzaXplIHx8IGNyZWF0ZVN5bnRoZXNpemUoKSwgW3BhcmVudFN5bnRoZXNpemVdKTtcbiAgY29uc3QgeyBzcGVlY2hTeW50aGVzaXMgfSA9IHBvbnlmaWxsO1xuICBjb25zdCBbdm9pY2VzLCBzZXRWb2ljZXNdID0gdXNlU3RhdGUoc3BlZWNoU3ludGhlc2lzLmdldFZvaWNlcygpKTtcblxuICB1c2VFdmVudChzcGVlY2hTeW50aGVzaXMsICd2b2ljZXNjaGFuZ2VkJywgKCkgPT4gc2V0Vm9pY2VzKHNwZWVjaFN5bnRoZXNpcy5nZXRWb2ljZXMoKSkpO1xuXG4gIGNvbnN0IGNvbnRleHQgPSB1c2VNZW1vKCgpID0+ICh7XG4gICAgcG9ueWZpbGwsXG4gICAgc3ludGhlc2l6ZSxcbiAgICB2b2ljZXNcbiAgfSksIFtwb255ZmlsbCwgc3ludGhlc2l6ZSwgdm9pY2VzXSk7XG5cbiAgcmV0dXJuIChcbiAgICA8Q29udGV4dC5Qcm92aWRlciB2YWx1ZT17IGNvbnRleHQgfT5cbiAgICAgIHtcbiAgICAgICAgdHlwZW9mIGNoaWxkcmVuID09PSAnZnVuY3Rpb24nID9cbiAgICAgICAgICA8Q29udGV4dC5Db25zdW1lcj5cbiAgICAgICAgICAgIHsgY29udGV4dCA9PiBjaGlsZHJlbihjb250ZXh0KSB9XG4gICAgICAgICAgPC9Db250ZXh0LkNvbnN1bWVyPlxuICAgICAgICA6XG4gICAgICAgICAgY2hpbGRyZW5cbiAgICAgIH1cbiAgICA8L0NvbnRleHQuUHJvdmlkZXI+XG4gICk7XG59O1xuXG5Db21wb3Nlci5kZWZhdWx0UHJvcHMgPSB7XG4gIGNoaWxkcmVuOiB1bmRlZmluZWQsXG4gIHBvbnlmaWxsOiB1bmRlZmluZWRcbn07XG5cbkNvbXBvc2VyLnByb3BUeXBlcyA9IHtcbiAgY2hpbGRyZW46IFByb3BUeXBlcy5hbnksXG4gIHBvbnlmaWxsOiBQcm9wVHlwZXMuc2hhcGUoe1xuICAgIHNwZWVjaFN5bnRoZXNpczogUHJvcFR5cGVzLmFueSxcbiAgICBTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2U6IFByb3BUeXBlcy5hbnlcbiAgfSlcbn07XG5cbmV4cG9ydCBkZWZhdWx0IENvbXBvc2VyO1xuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/Context.js":
+/*!***********************************************!*\
+  !*** ./node_modules/react-say/lib/Context.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _react = _interopRequireDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+
+var Context = /*#__PURE__*/_react["default"].createContext();
+
+var _default = Context;
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9Db250ZXh0LmpzIl0sIm5hbWVzIjpbIkNvbnRleHQiLCJSZWFjdCIsImNyZWF0ZUNvbnRleHQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQUFBOztBQUVBLElBQU1BLE9BQU8sZ0JBQUdDLGtCQUFNQyxhQUFOLEVBQWhCOztlQUVlRixPIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcblxuY29uc3QgQ29udGV4dCA9IFJlYWN0LmNyZWF0ZUNvbnRleHQoKTtcblxuZXhwb3J0IGRlZmF1bHQgQ29udGV4dFxuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/QueuedUtterance.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/react-say/lib/QueuedUtterance.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/react-say/node_modules/@babel/runtime/regenerator/index.js"));
+
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/classCallCheck.js"));
+
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/createClass.js"));
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
+
+var _createCustomEvent = _interopRequireDefault(__webpack_require__(/*! ./createCustomEvent */ "./node_modules/react-say/lib/createCustomEvent.js"));
+
+var _createDeferred = _interopRequireDefault(__webpack_require__(/*! ./createDeferred */ "./node_modules/react-say/lib/createDeferred.js"));
+
+var _createErrorEvent = _interopRequireDefault(__webpack_require__(/*! ./createErrorEvent */ "./node_modules/react-say/lib/createErrorEvent.js"));
+
+function speakUtterance(_x, _x2, _x3) {
+  return _speakUtterance.apply(this, arguments);
+}
+
+function _speakUtterance() {
+  _speakUtterance = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(ponyfill, utterance, startCallback) {
+    var speechSynthesis, startDeferred, errorDeferred, endDeferred, startEvent, finishedSpeaking, endPromise, endEvent;
+    return _regenerator["default"].wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            speechSynthesis = ponyfill.speechSynthesis;
+            startDeferred = (0, _createDeferred["default"])();
+            errorDeferred = (0, _createDeferred["default"])();
+            endDeferred = (0, _createDeferred["default"])();
+            utterance.addEventListener('end', endDeferred.resolve);
+            utterance.addEventListener('error', errorDeferred.resolve);
+            utterance.addEventListener('start', startDeferred.resolve); // if (speechSynthesis.speaking) {
+            //   console.warn(`ASSERTION: speechSynthesis.speaking should not be truthy before we call speak`);
+            // }
+
+            speechSynthesis.speak(utterance);
+            _context4.next = 10;
+            return Promise.race([errorDeferred.promise, startDeferred.promise]);
+
+          case 10:
+            startEvent = _context4.sent;
+
+            if (!(startEvent.type === 'error')) {
+              _context4.next = 13;
+              break;
+            }
+
+            throw startEvent.error;
+
+          case 13:
+            endPromise = Promise.race([errorDeferred.promise, endDeferred.promise]);
+            startCallback && startCallback( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
+              return _regenerator["default"].wrap(function _callee3$(_context3) {
+                while (1) {
+                  switch (_context3.prev = _context3.next) {
+                    case 0:
+                      if (finishedSpeaking) {
+                        _context3.next = 4;
+                        break;
+                      }
+
+                      speechSynthesis.cancel();
+                      _context3.next = 4;
+                      return endPromise;
+
+                    case 4:
+                    case "end":
+                      return _context3.stop();
+                  }
+                }
+              }, _callee3);
+            })));
+            _context4.next = 17;
+            return endPromise;
+
+          case 17:
+            endEvent = _context4.sent;
+            finishedSpeaking = true; // if (speechSynthesis.speaking) {
+            //   console.warn(`ASSERTION: speechSynthesis.speaking should not be truthy after speak is stopped`);
+            // }
+            // console.debug(`ENDED: ${ utterance.text }`);
+
+            if (!(endEvent.type === 'error')) {
+              _context4.next = 21;
+              break;
+            }
+
+            throw endEvent.error;
+
+          case 21:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _speakUtterance.apply(this, arguments);
+}
+
+var QueuedUtterance = /*#__PURE__*/function () {
+  function QueuedUtterance(ponyfill, utterance, _ref) {
+    var onEnd = _ref.onEnd,
+        onError = _ref.onError,
+        onStart = _ref.onStart;
+    (0, _classCallCheck2["default"])(this, QueuedUtterance);
+    this._cancelled = false;
+    this._deferred = (0, _createDeferred["default"])();
+    this._onEnd = onEnd;
+    this._onError = onError;
+    this._onStart = onStart;
+    this._ponyfill = ponyfill;
+    this._speaking = false;
+    this._utterance = utterance;
+    this.promise = this._deferred.promise;
+  }
+
+  (0, _createClass2["default"])(QueuedUtterance, [{
+    key: "cancel",
+    value: function () {
+      var _cancel = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+        return _regenerator["default"].wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this._cancelled = true;
+                _context.t0 = this._cancel;
+
+                if (!_context.t0) {
+                  _context.next = 5;
+                  break;
+                }
+
+                _context.next = 5;
+                return this._cancel();
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function cancel() {
+        return _cancel.apply(this, arguments);
+      }
+
+      return cancel;
+    }()
+  }, {
+    key: "speak",
+    value: function speak() {
+      var _this = this;
+
+      if (this._speaking) {
+        console.warn("ASSERTION: QueuedUtterance is already speaking or has spoken.");
+      }
+
+      this._speaking = true;
+      (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (!_this._cancelled) {
+                  _context2.next = 2;
+                  break;
+                }
+
+                throw new Error('cancelled');
+
+              case 2:
+                _context2.next = 4;
+                return speakUtterance(_this._ponyfill, _this._utterance, function (cancel) {
+                  if (_this._cancelled) {
+                    cancel();
+                    throw new Error('cancelled');
+                  } else {
+                    _this._cancel = cancel;
+                    _this._onStart && _this._onStart((0, _createCustomEvent["default"])('start'));
+                  }
+                });
+
+              case 4:
+                if (!_this._cancelled) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                throw new Error('cancelled');
+
+              case 6:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))().then(function () {
+        _this._onEnd && _this._onEnd((0, _createCustomEvent["default"])('end'));
+
+        _this._deferred.resolve();
+      }, function (error) {
+        _this._onError && _this._onError((0, _createErrorEvent["default"])(error));
+
+        _this._deferred.reject(error);
+      });
+      return this.promise;
+    }
+  }]);
+  return QueuedUtterance;
+}();
+
+exports["default"] = QueuedUtterance;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9RdWV1ZWRVdHRlcmFuY2UuanMiXSwibmFtZXMiOlsic3BlYWtVdHRlcmFuY2UiLCJwb255ZmlsbCIsInV0dGVyYW5jZSIsInN0YXJ0Q2FsbGJhY2siLCJzcGVlY2hTeW50aGVzaXMiLCJzdGFydERlZmVycmVkIiwiZXJyb3JEZWZlcnJlZCIsImVuZERlZmVycmVkIiwiYWRkRXZlbnRMaXN0ZW5lciIsInJlc29sdmUiLCJzcGVhayIsIlByb21pc2UiLCJyYWNlIiwicHJvbWlzZSIsInN0YXJ0RXZlbnQiLCJ0eXBlIiwiZXJyb3IiLCJlbmRQcm9taXNlIiwiZmluaXNoZWRTcGVha2luZyIsImNhbmNlbCIsImVuZEV2ZW50IiwiUXVldWVkVXR0ZXJhbmNlIiwib25FbmQiLCJvbkVycm9yIiwib25TdGFydCIsIl9jYW5jZWxsZWQiLCJfZGVmZXJyZWQiLCJfb25FbmQiLCJfb25FcnJvciIsIl9vblN0YXJ0IiwiX3BvbnlmaWxsIiwiX3NwZWFraW5nIiwiX3V0dGVyYW5jZSIsIl9jYW5jZWwiLCJjb25zb2xlIiwid2FybiIsIkVycm9yIiwidGhlbiIsInJlamVjdCJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7QUFDQTs7QUFDQTs7U0FFZUEsYzs7Ozs7a0dBQWYsa0JBQThCQyxRQUE5QixFQUF3Q0MsU0FBeEMsRUFBbURDLGFBQW5EO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUNVQyxZQUFBQSxlQURWLEdBQzhCSCxRQUQ5QixDQUNVRyxlQURWO0FBR1FDLFlBQUFBLGFBSFIsR0FHd0IsaUNBSHhCO0FBSVFDLFlBQUFBLGFBSlIsR0FJd0IsaUNBSnhCO0FBS1FDLFlBQUFBLFdBTFIsR0FLc0IsaUNBTHRCO0FBT0VMLFlBQUFBLFNBQVMsQ0FBQ00sZ0JBQVYsQ0FBMkIsS0FBM0IsRUFBa0NELFdBQVcsQ0FBQ0UsT0FBOUM7QUFDQVAsWUFBQUEsU0FBUyxDQUFDTSxnQkFBVixDQUEyQixPQUEzQixFQUFvQ0YsYUFBYSxDQUFD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LEVBQWtDLFVBQUFiLE1BQU0sRUFBSTtBQUM5RCxzQkFBSSxLQUFJLENBQUNNLFVBQVQsRUFBcUI7QUFDbkJOLG9CQUFBQSxNQUFNO0FBRU4sMEJBQU0sSUFBSWlCLEtBQUosQ0FBVSxXQUFWLENBQU47QUFDRCxtQkFKRCxNQUlPO0FBQ0wsb0JBQUEsS0FBSSxDQUFDSCxPQUFMLEdBQWVkLE1BQWY7QUFDQSxvQkFBQSxLQUFJLENBQUNVLFFBQUwsSUFBaUIsS0FBSSxDQUFDQSxRQUFMLENBQWMsbUNBQWtCLE9BQWxCLENBQWQsQ0FBakI7QUFDRDtBQUNGLGlCQVRtQixDQUxyQjs7QUFBQTtBQUFBLHFCQWdCSyxLQUFJLENBQUNKLFVBaEJWO0FBQUE7QUFBQTtBQUFBOztBQUFBLHNCQWlCUyxJQUFJVyxLQUFKLENBQVUsV0FBVixDQWpCVDs7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxPQUFELEtBbUJLQyxJQW5CTCxDQW1CVSxZQUFNO0FBQ2QsUUFBQSxLQUFJLENBQUNWLE1BQUwsSUFBZSxLQUFJLENBQUNBLE1BQUwsQ0FBWSxtQ0FBa0IsS0FBbEIsQ0FBWixDQUFmOztBQUNBLFFBQUEsS0FBSSxDQUFDRCxTQUFMLENBQWVqQixPQUFmO0FBQ0QsT0F0QkQsRUFzQkcsVUFBQU8sS0FBSyxFQUFJO0FBQ1YsUUFBQSxLQUFJLENBQUNZLFFBQUwsSUFBaUIsS0FBSSxDQUFDQSxRQUFMLENBQWMsa0NBQWlCWixLQUFqQixDQUFkLENBQWpCOztBQUNBLFFBQUEsS0FBSSxDQUFDVSxTQUFMLENBQWVZLE1BQWYsQ0FBc0J0QixLQUF0QjtBQUNELE9BekJEO0FBMkJBLGFBQU8sS0FBS0gsT0FBWjtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGNyZWF0ZUN1c3RvbUV2ZW50IGZyb20gJy4vY3JlYXRlQ3VzdG9tRXZlbnQnO1xuaW1wb3J0IGNyZWF0ZURlZmVycmVkIGZyb20gJy4vY3JlYXRlRGVmZXJyZWQnO1xuaW1wb3J0IGNyZWF0ZUVycm9yRXZlbnQgZnJvbSAnLi9jcmVhdGVFcnJvckV2ZW50JztcblxuYXN5bmMgZnVuY3Rpb24gc3BlYWtVdHRlcmFuY2UocG9ueWZpbGwsIHV0dGVyYW5jZSwgc3RhcnRDYWxsYmFjaykge1xuICBjb25zdCB7IHNwZWVjaFN5bnRoZXNpcyB9ID0gcG9ueWZpbGw7XG5cbiAgY29uc3Qgc3RhcnREZWZlcnJlZCA9IGNyZWF0ZURlZmVycmVkKCk7XG4gIGNvbnN0IGVycm9yRGVmZXJyZWQgPSBjcmVhdGVEZWZlcnJlZCgpO1xuICBjb25zdCBlbmREZWZlcnJlZCA9IGNyZWF0ZURlZmVycmVkKCk7XG5cbiAgdXR0ZXJhbmNlLmFkZEV2ZW50TGlzdGVuZXIoJ2VuZCcsIGVuZERlZmVycmVkLnJlc29sdmUpO1xuICB1dHRlcmFuY2UuYWRkRXZlbnRMaXN0ZW5lcignZXJyb3InLCBlcnJvckRlZmVycmVkLnJlc29sdmUpO1xuICB1dHRlcmFuY2UuYWRkRXZlbnRMaXN0ZW5lcignc3RhcnQnLCBzdGFydERlZmVycmVkLnJlc29sdmUpO1xuXG4gIC8vIGlmIChzcGVlY2hTeW50aGVzaXMuc3BlYWtpbmcpIHtcbiAgLy8gICBjb25zb2xlLndhcm4oYEFTU0VSVElPTjogc3BlZWNoU3ludGhlc2lzLnNwZWFraW5nIHNob3VsZCBub3QgYmUgdHJ1dGh5IGJlZm9yZSB3ZSBjYWxsIHNwZWFrYCk7XG4gIC8vIH1cblxuICBzcGVlY2hTeW50aGVzaXMuc3BlYWsodXR0ZXJhbmNlKTtcblxuICBjb25zdCBzdGFydEV2ZW50ID0gYXdhaXQgUHJvbWlzZS5yYWNlKFtcbiAgICBlcnJvckRlZmVycmVkLnByb21pc2UsXG4gICAgc3RhcnREZWZlcnJlZC5wcm9taXNlXG4gIF0pO1xuXG4gIGlmIChzdGFydEV2ZW50LnR5cGUgPT09ICdlcnJvcicpIHtcbiAgICB0aHJvdyBzdGFydEV2ZW50LmVycm9yO1xuICB9XG5cbiAgbGV0IGZpbmlzaGVkU3BlYWtpbmc7XG4gIGNvbnN0IGVuZFByb21pc2UgPSBQcm9taXNlLnJhY2UoW1xuICAgIGVycm9yRGVmZXJyZWQucHJvbWlzZSxcbiAgICBlbmREZWZlcnJlZC5wcm9taXNlXG4gIF0pO1xuXG4gIHN0YXJ0Q2FsbGJhY2sgJiYgc3RhcnRDYWxsYmFjayhhc3luYyAoKSA9PiB7XG4gICAgaWYgKCFmaW5pc2hlZFNwZWFraW5nKSB7XG4gICAgICBzcGVlY2hTeW50aGVzaXMuY2FuY2VsKCk7XG4gICAgICBhd2FpdCBlbmRQcm9taXNlO1xuICAgIH1cbiAgfSk7XG5cbiAgY29uc3QgZW5kRXZlbnQgPSBhd2FpdCBlbmRQcm9taXNlO1xuXG4gIGZpbmlzaGVkU3BlYWtpbmcgPSB0cnVlO1xuXG4gIC8vIGlmIChzcGVlY2hTeW50aGVzaXMuc3BlYWtpbmcpIHtcbiAgLy8gICBjb25zb2xlLndhcm4oYEFTU0VSVElPTjogc3BlZWNoU3ludGhlc2lzLnNwZWFraW5nIHNob3VsZCBub3QgYmUgdHJ1dGh5IGFmdGVyIHNwZWFrIGlzIHN0b3BwZWRgKTtcbiAgLy8gfVxuXG4gIC8vIGNvbnNvbGUuZGVidWcoYEVOREVEOiAkeyB1dHRlcmFuY2UudGV4dCB9YCk7XG5cbiAgaWYgKGVuZEV2ZW50LnR5cGUgPT09ICdlcnJvcicpIHtcbiAgICB0aHJvdyBlbmRFdmVudC5lcnJvcjtcbiAgfVxufVxuXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBRdWV1ZWRVdHRlcmFuY2Uge1xuICBjb25zdHJ1Y3Rvcihwb255ZmlsbCwgdXR0ZXJhbmNlLCB7IG9uRW5kLCBvbkVycm9yLCBvblN0YXJ0IH0pIHtcbiAgICB0aGlzLl9jYW5jZWxsZWQgPSBmYWxzZTtcbiAgICB0aGlzLl9kZWZlcnJlZCA9IGNyZWF0ZURlZmVycmVkKCk7XG4gICAgdGhpcy5fb25FbmQgPSBvbkVuZDtcbiAgICB0aGlzLl9vbkVycm9yID0gb25FcnJvcjtcbiAgICB0aGlzLl9vblN0YXJ0ID0gb25TdGFydDtcbiAgICB0aGlzLl9wb255ZmlsbCA9IHBvbnlmaWxsO1xuICAgIHRoaXMuX3NwZWFraW5nID0gZmFsc2U7XG4gICAgdGhpcy5fdXR0ZXJhbmNlID0gdXR0ZXJhbmNlO1xuXG4gICAgdGhpcy5wcm9taXNlID0gdGhpcy5fZGVmZXJyZWQucHJvbWlzZTtcbiAgfVxuXG4gIGFzeW5jIGNhbmNlbCgpIHtcbiAgICB0aGlzLl9jYW5jZWxsZWQgPSB0cnVlO1xuICAgIHRoaXMuX2NhbmNlbCAmJiBhd2FpdCB0aGlzLl9jYW5jZWwoKTtcbiAgfVxuXG4gIHNwZWFrKCkge1xuICAgIGlmICh0aGlzLl9zcGVha2luZykge1xuICAgICAgY29uc29sZS53YXJuKGBBU1NFUlRJT046IFF1ZXVlZFV0dGVyYW5jZSBpcyBhbHJlYWR5IHNwZWFraW5nIG9yIGhhcyBzcG9rZW4uYCk7XG4gICAgfVxuXG4gICAgdGhpcy5fc3BlYWtpbmcgPSB0cnVlO1xuXG4gICAgKGFzeW5jICgpID0+IHtcbiAgICAgIGlmICh0aGlzLl9jYW5jZWxsZWQpIHtcbiAgICAgICAgdGhyb3cgbmV3IEVycm9yKCdjYW5jZWxsZWQnKTtcbiAgICAgIH1cblxuICAgICAgYXdhaXQgc3BlYWtVdHRlcmFuY2UodGhpcy5fcG9ueWZpbGwsIHRoaXMuX3V0dGVyYW5jZSwgY2FuY2VsID0+IHtcbiAgICAgICAgaWYgKHRoaXMuX2NhbmNlbGxlZCkge1xuICAgICAgICAgIGNhbmNlbCgpO1xuXG4gICAgICAgICAgdGhyb3cgbmV3IEVycm9yKCdjYW5jZWxsZWQnKTtcbiAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICB0aGlzLl9jYW5jZWwgPSBjYW5jZWw7XG4gICAgICAgICAgdGhpcy5fb25TdGFydCAmJiB0aGlzLl9vblN0YXJ0KGNyZWF0ZUN1c3RvbUV2ZW50KCdzdGFydCcpKTtcbiAgICAgICAgfVxuICAgICAgfSk7XG5cbiAgICAgIGlmICh0aGlzLl9jYW5jZWxsZWQpIHtcbiAgICAgICAgdGhyb3cgbmV3IEVycm9yKCdjYW5jZWxsZWQnKTtcbiAgICAgIH1cbiAgICB9KSgpLnRoZW4oKCkgPT4ge1xuICAgICAgdGhpcy5fb25FbmQgJiYgdGhpcy5fb25FbmQoY3JlYXRlQ3VzdG9tRXZlbnQoJ2VuZCcpKTtcbiAgICAgIHRoaXMuX2RlZmVycmVkLnJlc29sdmUoKTtcbiAgICB9LCBlcnJvciA9PiB7XG4gICAgICB0aGlzLl9vbkVycm9yICYmIHRoaXMuX29uRXJyb3IoY3JlYXRlRXJyb3JFdmVudChlcnJvcikpO1xuICAgICAgdGhpcy5fZGVmZXJyZWQucmVqZWN0KGVycm9yKTtcbiAgICB9KTtcblxuICAgIHJldHVybiB0aGlzLnByb21pc2U7XG4gIH1cbn1cbiJdfQ==
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/Say.js":
+/*!*******************************************!*\
+  !*** ./node_modules/react-say/lib/Say.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutProperties.js"));
+
+var _readOnlyError2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/readOnlyError */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/readOnlyError.js"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+
+var _Composer = _interopRequireDefault(__webpack_require__(/*! ./Composer */ "./node_modules/react-say/lib/Composer.js"));
+
+var _Context = _interopRequireDefault(__webpack_require__(/*! ./Context */ "./node_modules/react-say/lib/Context.js"));
+
+var _createNativeUtterance = _interopRequireDefault(__webpack_require__(/*! ./createNativeUtterance */ "./node_modules/react-say/lib/createNativeUtterance.js"));
+
+var _migrateDeprecatedProps = _interopRequireDefault(__webpack_require__(/*! ./migrateDeprecatedProps */ "./node_modules/react-say/lib/migrateDeprecatedProps.js"));
+
+var _SayUtterance = _interopRequireDefault(__webpack_require__(/*! ./SayUtterance */ "./node_modules/react-say/lib/SayUtterance.js"));
+
+var _excluded = ["ponyfill"];
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var Say = function Say(props) {
+  var _migrateDeprecatedPro = (0, _migrateDeprecatedProps["default"])(props, Say),
+      lang = _migrateDeprecatedPro.lang,
+      onBoundary = _migrateDeprecatedPro.onBoundary,
+      onEnd = _migrateDeprecatedPro.onEnd,
+      onError = _migrateDeprecatedPro.onError,
+      onStart = _migrateDeprecatedPro.onStart,
+      pitch = _migrateDeprecatedPro.pitch,
+      rate = _migrateDeprecatedPro.rate,
+      speak = _migrateDeprecatedPro.speak,
+      text = _migrateDeprecatedPro.text,
+      voice = _migrateDeprecatedPro.voice,
+      volume = _migrateDeprecatedPro.volume;
+
+  var _useContext = (0, _react.useContext)(_Context["default"]),
+      ponyfill = _useContext.ponyfill;
+
+  if (speak && !text) {
+    console.warn('react-say: "speak" prop is being deprecated and renamed to "text".');
+    speak, (0, _readOnlyError2["default"])("text");
+  }
+
+  var utterance = (0, _react.useMemo)(function () {
+    return (0, _createNativeUtterance["default"])(ponyfill, {
+      lang: lang,
+      onBoundary: onBoundary,
+      pitch: pitch,
+      rate: rate,
+      text: text,
+      voice: voice,
+      volume: volume
+    });
+  }, [lang, onBoundary, pitch, ponyfill, rate, text, voice, volume]);
+  return /*#__PURE__*/_react["default"].createElement(_SayUtterance["default"], {
+    onEnd: onEnd,
+    onError: onError,
+    onStart: onStart,
+    ponyfill: ponyfill,
+    utterance: utterance
+  });
+};
+
+Say.defaultProps = {
+  children: undefined,
+  lang: undefined,
+  onBoundary: undefined,
+  onEnd: undefined,
+  onError: undefined,
+  onStart: undefined,
+  pitch: undefined,
+  rate: undefined,
+  speak: undefined,
+  voice: undefined,
+  volume: undefined
+};
+Say.propTypes = {
+  children: _propTypes["default"].any,
+  lang: _propTypes["default"].string,
+  onBoundary: _propTypes["default"].func,
+  onEnd: _propTypes["default"].func,
+  onError: _propTypes["default"].func,
+  onStart: _propTypes["default"].func,
+  pitch: _propTypes["default"].number,
+  rate: _propTypes["default"].number,
+  speak: _propTypes["default"].string,
+  text: _propTypes["default"].string.isRequired,
+  voice: _propTypes["default"].oneOfType([_propTypes["default"].any, _propTypes["default"].func]),
+  volume: _propTypes["default"].number
+};
+
+var SayWithContext = function SayWithContext(_ref) {
+  var ponyfill = _ref.ponyfill,
+      props = (0, _objectWithoutProperties2["default"])(_ref, _excluded);
+  return /*#__PURE__*/_react["default"].createElement(_Composer["default"], {
+    ponyfill: ponyfill
+  }, /*#__PURE__*/_react["default"].createElement(Say, props));
+};
+
+SayWithContext.defaultProps = _objectSpread(_objectSpread({}, _SayUtterance["default"].defaultProps), {}, {
+  ponyfill: undefined
+});
+SayWithContext.propTypes = _objectSpread(_objectSpread({}, _SayUtterance["default"].propTypes), {}, {
+  ponyfill: _propTypes["default"].shape({
+    speechSynthesis: _propTypes["default"].any.isRequired,
+    SpeechSynthesisUtterance: _propTypes["default"].any.isRequired
+  })
+});
+var _default = SayWithContext;
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9TYXkuanMiXSwibmFtZXMiOlsiU2F5IiwicHJvcHMiLCJsYW5nIiwib25Cb3VuZGFyeSIsIm9uRW5kIiwib25FcnJvciIsIm9uU3RhcnQiLCJwaXRjaCIsInJhdGUiLCJzcGVhayIsInRleHQiLCJ2b2ljZSIsInZvbHVtZSIsIkNvbnRleHQiLCJwb255ZmlsbCIsImNvbnNvbGUiLCJ3YXJuIiwidXR0ZXJhbmNlIiwiZGVmYXVsdFByb3BzIiwiY2hpbGRyZW4iLCJ1bmRlZmluZWQiLCJwcm9wVHlwZXMiLCJQcm9wVHlwZXMiLCJhbnkiLCJzdHJpbmciLCJmdW5jIiwibnVtYmVyIiwiaXNSZXF1aXJlZCIsIm9uZU9mVHlwZSIsIlNheVdpdGhDb250ZXh0IiwiU2F5VXR0ZXJhbmNlIiwic2hhcGUiLCJzcGVlY2hTeW50aGVzaXMiLCJTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7O0FBQ0E7O0FBRUE7O0FBQ0E7O0FBQ0E7O0FBQ0E7O0FBQ0E7Ozs7Ozs7Ozs7OztBQUVBLElBQU1BLEdBQUcsR0FBRyxTQUFOQSxHQUFNLENBQUFDLEtBQUssRUFBSTtBQUNuQiw4QkFZSSx3Q0FBdUJBLEtBQXZCLEVBQThCRCxHQUE5QixDQVpKO0FBQUEsTUFDRUUsSUFERix5QkFDRUEsSUFERjtBQUFBLE1BRUVDLFVBRkYseUJBRUVBLFVBRkY7QUFBQSxNQUdFQyxLQUhGLHlCQUdFQSxLQUhGO0FBQUEsTUFJRUMsT0FKRix5QkFJRUEsT0FKRjtBQUFBLE1BS0VDLE9BTEYseUJBS0VBLE9BTEY7QUFBQSxNQU1FQyxLQU5GLHlCQU1FQSxLQU5GO0FBQUEsTUFPRUMsSUFQRix5QkFPRUEsSUFQRjtBQUFBLE1BUUVDLEtBUkYseUJBUUVBLEtBUkY7QUFBQSxNQVNFQyxJQVRGLHlCQVNFQSxJQVRGO0FBQUEsTUFVRUMsS0FWRix5QkFVRUEsS0FWRjtBQUFBLE1BV0VDLE1BWEYseUJBV0VBLE1BWEY7O0FBY0Es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Q1gsWUFBZixtQ0FDS1kseUJBQWFaLFlBRGxCO0FBRUVKLEVBQUFBLFFBQVEsRUFBRU07QUFGWjtBQUtBUyxjQUFjLENBQUNSLFNBQWYsbUNBQ0tTLHlCQUFhVCxTQURsQjtBQUVFUCxFQUFBQSxRQUFRLEVBQUVRLHNCQUFVUyxLQUFWLENBQWdCO0FBQ3hCQyxJQUFBQSxlQUFlLEVBQUVWLHNCQUFVQyxHQUFWLENBQWNJLFVBRFA7QUFFeEJNLElBQUFBLHdCQUF3QixFQUFFWCxzQkFBVUMsR0FBVixDQUFjSTtBQUZoQixHQUFoQjtBQUZaO2VBUWVFLGMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUHJvcFR5cGVzIGZyb20gJ3Byb3AtdHlwZXMnO1xuaW1wb3J0IFJlYWN0LCB7IHVzZUNvbnRleHQsIHVzZU1lbW8gfSBmcm9tICdyZWFjdCc7XG5cbmltcG9ydCBDb21wb3NlciBmcm9tICcuL0NvbXBvc2VyJztcbmltcG9ydCBDb250ZXh0IGZyb20gJy4vQ29udGV4dCc7XG5pbXBvcnQgY3JlYXRlTmF0aXZlVXR0ZXJhbmNlIGZyb20gJy4vY3JlYXRlTmF0aXZlVXR0ZXJhbmNlJztcbmltcG9ydCBtaWdyYXRlRGVwcmVjYXRlZFByb3BzIGZyb20gJy4vbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyc7XG5pbXBvcnQgU2F5VXR0ZXJhbmNlIGZyb20gJy4vU2F5VXR0ZXJhbmNlJztcblxuY29uc3QgU2F5ID0gcHJvcHMgPT4ge1xuICBjb25zdCB7XG4gICAgbGFuZyxcbiAgICBvbkJvdW5kYXJ5LFxuICAgIG9uRW5kLFxuICAgIG9uRXJyb3IsXG4gICAgb25TdGFydCxcbiAgICBwaXRjaCxcbiAgICByYXRlLFxuICAgIHNwZWFrLFxuICAgIHRleHQsXG4gICAgdm9pY2UsXG4gICAgdm9sdW1lXG4gIH0gPSBtaWdyYXRlRGVwcmVjYXRlZFByb3BzKHByb3BzLCBTYXkpO1xuXG4gIGNvbnN0IHsgcG9ueWZpbGwgfSA9IHVzZUNvbnRleHQoQ29udGV4dCk7XG5cbiAgaWYgKHNwZWFrICYmICF0ZXh0KSB7XG4gICAgY29uc29sZS53YXJuKCdyZWFjdC1zYXk6IFwic3BlYWtcIiBwcm9wIGlzIGJlaW5nIGRlcHJlY2F0ZWQgYW5kIHJlbmFtZWQgdG8gXCJ0ZXh0XCIuJyk7XG4gICAgdGV4dCA9IHNwZWFrO1xuICB9XG5cbiAgY29uc3QgdXR0ZXJhbmNlID0gdXNlTWVtbygoKSA9PlxuICAgIGNyZWF0ZU5hdGl2ZVV0dGVyYW5jZShcbiAgICAgIHBvbnlmaWxsLFxuICAgICAge1xuICAgICAgICBsYW5nLFxuICAgICAgICBvbkJvdW5kYXJ5LFxuICAgICAgICBwaXRjaCxcbiAgICAgICAgcmF0ZSxcbiAgICAgICAgdGV4dCxcbiAgICAgICAgdm9pY2UsXG4gICAgICAgIHZvbHVtZVxuICAgICAgfVxuICAgICksXG4gICAgW1xuICAgICAgbGFuZyxcbiAgICAgIG9uQm91bmRhcnksXG4gICAgICBwaXRjaCxcbiAgICAgIHBvbnlmaWxsLFxuICAgICAgcmF0ZSxcbiAgICAgIHRleHQsXG4gICAgICB2b2ljZSxcbiAgICAgIHZvbHVtZVxuICAgIF1cbiAgKTtcblxuICByZXR1cm4gKFxuICAgIDxTYXlVdHRlcmFuY2VcbiAgICAgIG9uRW5kPXsgb25FbmQgfVxuICAgICAgb25FcnJvcj17IG9uRXJyb3IgfVxuICAgICAgb25TdGFydD17IG9uU3RhcnQgfVxuICAgICAgcG9ueWZpbGw9eyBwb255ZmlsbCB9XG4gICAgICB1dHRlcmFuY2U9eyB1dHRlcmFuY2UgfVxuICAgIC8+XG4gICk7XG59XG5cblNheS5kZWZhdWx0UHJvcHMgPSB7XG4gIGNoaWxkcmVuOiB1bmRlZmluZWQsXG4gIGxhbmc6IHVuZGVmaW5lZCxcbiAgb25Cb3VuZGFyeTogdW5kZWZpbmVkLFxuICBvbkVuZDogdW5kZWZpbmVkLFxuICBvbkVycm9yOiB1bmRlZmluZWQsXG4gIG9uU3RhcnQ6IHVuZGVmaW5lZCxcbiAgcGl0Y2g6IHVuZGVmaW5lZCxcbiAgcmF0ZTogdW5kZWZpbmVkLFxuICBzcGVhazogdW5kZWZpbmVkLFxuICB2b2ljZTogdW5kZWZpbmVkLFxuICB2b2x1bWU6IHVuZGVmaW5lZFxufTtcblxuU2F5LnByb3BUeXBlcyA9IHtcbiAgY2hpbGRyZW46IFByb3BUeXBlcy5hbnksXG4gIGxhbmc6IFByb3BUeXBlcy5zdHJpbmcsXG4gIG9uQm91bmRhcnk6IFByb3BUeXBlcy5mdW5jLFxuICBvbkVuZDogUHJvcFR5cGVzLmZ1bmMsXG4gIG9uRXJyb3I6IFByb3BUeXBlcy5mdW5jLFxuICBvblN0YXJ0OiBQcm9wVHlwZXMuZnVuYyxcbiAgcGl0Y2g6IFByb3BUeXBlcy5udW1iZXIsXG4gIHJhdGU6IFByb3BUeXBlcy5udW1iZXIsXG4gIHNwZWFrOiBQcm9wVHlwZXMuc3RyaW5nLFxuICB0ZXh0OiBQcm9wVHlwZXMuc3RyaW5nLmlzUmVxdWlyZWQsXG4gIHZvaWNlOiBQcm9wVHlwZXMub25lT2ZUeXBlKFtQcm9wVHlwZXMuYW55LCBQcm9wVHlwZXMuZnVuY10pLFxuICB2b2x1bWU6IFByb3BUeXBlcy5udW1iZXJcbn07XG5cbmNvbnN0IFNheVdpdGhDb250ZXh0ID0gKHsgcG9ueWZpbGwsIC4uLnByb3BzIH0pID0+IChcbiAgPENvbXBvc2VyIHBvbnlmaWxsPXsgcG9ueWZpbGwgfT5cbiAgICA8U2F5IHsuLi5wcm9wc30gLz5cbiAgPC9Db21wb3Nlcj5cbik7XG5cblNheVdpdGhDb250ZXh0LmRlZmF1bHRQcm9wcyA9IHtcbiAgLi4uU2F5VXR0ZXJhbmNlLmRlZmF1bHRQcm9wcyxcbiAgcG9ueWZpbGw6IHVuZGVmaW5lZFxufTtcblxuU2F5V2l0aENvbnRleHQucHJvcFR5cGVzID0ge1xuICAuLi5TYXlVdHRlcmFuY2UucHJvcFR5cGVzLFxuICBwb255ZmlsbDogUHJvcFR5cGVzLnNoYXBlKHtcbiAgICBzcGVlY2hTeW50aGVzaXM6IFByb3BUeXBlcy5hbnkuaXNSZXF1aXJlZCxcbiAgICBTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2U6IFByb3BUeXBlcy5hbnkuaXNSZXF1aXJlZFxuICB9KVxufTtcblxuZXhwb3J0IGRlZmF1bHQgU2F5V2l0aENvbnRleHRcbiJdfQ==
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/SayButton.js":
+/*!*************************************************!*\
+  !*** ./node_modules/react-say/lib/SayButton.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/slicedToArray.js"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+
+var _migrateDeprecatedProps = _interopRequireDefault(__webpack_require__(/*! ./migrateDeprecatedProps */ "./node_modules/react-say/lib/migrateDeprecatedProps.js"));
+
+var _Say = _interopRequireDefault(__webpack_require__(/*! ./Say */ "./node_modules/react-say/lib/Say.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+var SayButton = function SayButton(props) {
+  var _migrateDeprecatedPro = (0, _migrateDeprecatedProps["default"])(props, SayButton),
+      children = _migrateDeprecatedPro.children,
+      disabled = _migrateDeprecatedPro.disabled,
+      lang = _migrateDeprecatedPro.lang,
+      onBoundary = _migrateDeprecatedPro.onBoundary,
+      _onEnd = _migrateDeprecatedPro.onEnd,
+      onError = _migrateDeprecatedPro.onError,
+      onStart = _migrateDeprecatedPro.onStart,
+      pitch = _migrateDeprecatedPro.pitch,
+      ponyfill = _migrateDeprecatedPro.ponyfill,
+      rate = _migrateDeprecatedPro.rate,
+      text = _migrateDeprecatedPro.text,
+      voice = _migrateDeprecatedPro.voice,
+      volume = _migrateDeprecatedPro.volume;
+
+  var _useState = (0, _react.useState)(false),
+      _useState2 = (0, _slicedToArray2["default"])(_useState, 2),
+      busy = _useState2[0],
+      setBusy = _useState2[1];
+
+  var handleClick = (0, _react.useCallback)(function () {
+    return setBusy(true);
+  });
+  var sayProps = {
+    lang: lang,
+    onBoundary: onBoundary,
+    onEnd: function onEnd(event) {
+      setBusy(false);
+      _onEnd && _onEnd(event);
+    },
+    onError: onError,
+    onStart: onStart,
+    pitch: pitch,
+    ponyfill: ponyfill,
+    rate: rate,
+    text: text,
+    voice: voice,
+    volume: volume
+  };
+  return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement("button", {
+    disabled: typeof disabled === 'boolean' ? disabled : busy,
+    onClick: handleClick
+  }, children), busy && /*#__PURE__*/_react["default"].createElement(_Say["default"], sayProps));
+};
+
+SayButton.defaultProps = {
+  children: undefined,
+  disabled: undefined,
+  lang: undefined,
+  onBoundary: undefined,
+  onEnd: undefined,
+  onError: undefined,
+  onStart: undefined,
+  pitch: undefined,
+  ponyfill: undefined,
+  rate: undefined,
+  text: undefined,
+  voice: undefined,
+  volume: undefined
+};
+SayButton.propTypes = {
+  children: _propTypes["default"].any,
+  disabled: _propTypes["default"].bool,
+  lang: _propTypes["default"].string,
+  onBoundary: _propTypes["default"].func,
+  onEnd: _propTypes["default"].func,
+  onError: _propTypes["default"].func,
+  onStart: _propTypes["default"].func,
+  pitch: _propTypes["default"].number,
+  ponyfill: _propTypes["default"].shape({
+    speechSynthesis: _propTypes["default"].any.isRequired,
+    SpeechSynthesisUtterance: _propTypes["default"].any.isRequired
+  }),
+  rate: _propTypes["default"].number,
+  text: _propTypes["default"].string,
+  voice: _propTypes["default"].oneOfType([_propTypes["default"].any, _propTypes["default"].func]),
+  volume: _propTypes["default"].number
+};
+var _default = SayButton;
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9TYXlCdXR0b24uanMiXSwibmFtZXMiOlsiU2F5QnV0dG9uIiwicHJvcHMiLCJjaGlsZHJlbiIsImRpc2FibGVkIiwibGFuZyIsIm9uQm91bmRhcnkiLCJvbkVuZCIsIm9uRXJyb3IiLCJvblN0YXJ0IiwicGl0Y2giLCJwb255ZmlsbCIsInJhdGUiLCJ0ZXh0Iiwidm9pY2UiLCJ2b2x1bWUiLCJidXN5Iiwic2V0QnVzeSIsImhhbmRsZUNsaWNrIiwic2F5UHJvcHMiLCJldmVudCIsImRlZmF1bHRQcm9wcyIsInVuZGVmaW5lZCIsInByb3BUeXBlcyIsIlByb3BUeXBlcyIsImFueSIsImJvb2wiLCJzdHJpbmciLCJmdW5jIiwibnVtYmVyIiwic2hhcGUiLCJzcGVlY2hTeW50aGVzaXMiLCJpc1JlcXVpcmVkIiwiU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlIiwib25lT2ZUeXBlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7O0FBQUE7O0FBQ0E7O0FBRUE7O0FBQ0E7Ozs7OztBQUVBLElBQU1BLFNBQVMsR0FBRyxTQUFaQSxTQUFZLENBQUFDLEtBQUssRUFBSTtBQUN6Qiw4QkFjSSx3Q0FBdUJBLEtBQXZCLEVBQThCRCxTQUE5QixDQWRKO0FBQUEsTUFDRUUsUUFERix5QkFDRUEsUUFERjtBQUFBLE1BRUVDLFFBRkYseUJBRUVBLFFBRkY7QUFBQSxNQUdFQyxJQUhGLHlCQUdFQSxJQUhGO0FBQUEsTUFJRUMsVUFKRix5QkFJRUEsVUFKRjtBQUFBLE1BS0VDLE1BTEYseUJBS0VBLEtBTEY7QUFBQSxNQU1FQyxPQU5GLHlCQU1FQSxPQU5GO0FBQUEsTUFPRUMsT0FQRix5QkFPRUEsT0FQRjtBQUFBLE1BUUVDLEtBUkYseUJBUUVBLEtBUkY7QUFBQSxNQVNFQyxRQVRGLHlCQVNFQSxRQVRGO0FBQUEsTUFVRUMsSUFWRix5QkFVRUEsSUFWRjtBQUFBLE1BV0VDLElBWEYseUJBV0VBLElBWEY7QUFBQSxNQVlFQyxLQVpGLHlCQVlFQSxLQVpGO0FBQUEs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YixFQUFBQSxLQUFLLEVBQUVVLHNCQUFVVSxTQUFWLENBQW9CLENBQUNWLHNCQUFVQyxHQUFYLEVBQWdCRCxzQkFBVUksSUFBMUIsQ0FBcEIsQ0FmYTtBQWdCcEJiLEVBQUFBLE1BQU0sRUFBRVMsc0JBQVVLO0FBaEJFLENBQXRCO2VBbUJlNUIsUyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBQcm9wVHlwZXMgZnJvbSAncHJvcC10eXBlcyc7XG5pbXBvcnQgUmVhY3QsIHsgdXNlQ2FsbGJhY2ssIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnO1xuXG5pbXBvcnQgbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyBmcm9tICcuL21pZ3JhdGVEZXByZWNhdGVkUHJvcHMnO1xuaW1wb3J0IFNheSBmcm9tICcuL1NheSc7XG5cbmNvbnN0IFNheUJ1dHRvbiA9IHByb3BzID0+IHtcbiAgY29uc3Qge1xuICAgIGNoaWxkcmVuLFxuICAgIGRpc2FibGVkLFxuICAgIGxhbmcsXG4gICAgb25Cb3VuZGFyeSxcbiAgICBvbkVuZCxcbiAgICBvbkVycm9yLFxuICAgIG9uU3RhcnQsXG4gICAgcGl0Y2gsXG4gICAgcG9ueWZpbGwsXG4gICAgcmF0ZSxcbiAgICB0ZXh0LFxuICAgIHZvaWNlLFxuICAgIHZvbHVtZVxuICB9ID0gbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyhwcm9wcywgU2F5QnV0dG9uKTtcblxuICBjb25zdCBbYnVzeSwgc2V0QnVzeV0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IGhhbmRsZUNsaWNrID0gdXNlQ2FsbGJhY2soKCkgPT4gc2V0QnVzeSh0cnVlKSk7XG4gIGNvbnN0IHNheVByb3BzID0ge1xuICAgIGxhbmcsXG4gICAgb25Cb3VuZGFyeSxcbiAgICBvbkVuZDogZXZlbnQgPT4ge1xuICAgICAgc2V0QnVzeShmYWxzZSk7XG4gICAgICBvbkVuZCAmJiBvbkVuZChldmVudCk7XG4gICAgfSxcbiAgICBvbkVycm9yLFxuICAgIG9uU3RhcnQsXG4gICAgcGl0Y2gsXG4gICAgcG9ueWZpbGwsXG4gICAgcmF0ZSxcbiAgICB0ZXh0LFxuICAgIHZvaWNlLFxuICAgIHZvbHVtZVxuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPFJlYWN0LkZyYWdtZW50PlxuICAgICAgPGJ1dHRvblxuICAgICAgICBkaXNhYmxlZD17IHR5cGVvZiBkaXNhYmxlZCA9PT0gJ2Jvb2xlYW4nID8gZGlzYWJsZWQgOiBidXN5IH1cbiAgICAgICAgb25DbGljaz17IGhhbmRsZUNsaWNrIH1cbiAgICAgID5cbiAgICAgICAgeyBjaGlsZHJlbiB9XG4gICAgICA8L2J1dHRvbj5cbiAgICAgIHsgYnVzeSAmJiA8U2F5IHsgLi4uc2F5UHJvcHMgfSAvPiB9XG4gICAgPC9SZWFjdC5GcmFnbWVudD5cbiAgKTtcbn07XG5cblNheUJ1dHRvbi5kZWZhdWx0UHJvcHMgPSB7XG4gIGNoaWxkcmVuOiB1bmRlZmluZWQsXG4gIGRpc2FibGVkOiB1bmRlZmluZWQsXG4gIGxhbmc6IHVuZGVmaW5lZCxcbiAgb25Cb3VuZGFyeTogdW5kZWZpbmVkLFxuICBvbkVuZDogdW5kZWZpbmVkLFxuICBvbkVycm9yOiB1bmRlZmluZWQsXG4gIG9uU3RhcnQ6IHVuZGVmaW5lZCxcbiAgcGl0Y2g6IHVuZGVmaW5lZCxcbiAgcG9ueWZpbGw6IHVuZGVmaW5lZCxcbiAgcmF0ZTogdW5kZWZpbmVkLFxuICB0ZXh0OiB1bmRlZmluZWQsXG4gIHZvaWNlOiB1bmRlZmluZWQsXG4gIHZvbHVtZTogdW5kZWZpbmVkXG59O1xuXG5TYXlCdXR0b24ucHJvcFR5cGVzID0ge1xuICBjaGlsZHJlbjogUHJvcFR5cGVzLmFueSxcbiAgZGlzYWJsZWQ6IFByb3BUeXBlcy5ib29sLFxuICBsYW5nOiBQcm9wVHlwZXMuc3RyaW5nLFxuICBvbkJvdW5kYXJ5OiBQcm9wVHlwZXMuZnVuYyxcbiAgb25FbmQ6IFByb3BUeXBlcy5mdW5jLFxuICBvbkVycm9yOiBQcm9wVHlwZXMuZnVuYyxcbiAgb25TdGFydDogUHJvcFR5cGVzLmZ1bmMsXG4gIHBpdGNoOiBQcm9wVHlwZXMubnVtYmVyLFxuICBwb255ZmlsbDogUHJvcFR5cGVzLnNoYXBlKHtcbiAgICBzcGVlY2hTeW50aGVzaXM6IFByb3BUeXBlcy5hbnkuaXNSZXF1aXJlZCxcbiAgICBTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2U6IFByb3BUeXBlcy5hbnkuaXNSZXF1aXJlZFxuICB9KSxcbiAgcmF0ZTogUHJvcFR5cGVzLm51bWJlcixcbiAgdGV4dDogUHJvcFR5cGVzLnN0cmluZyxcbiAgdm9pY2U6IFByb3BUeXBlcy5vbmVPZlR5cGUoW1Byb3BUeXBlcy5hbnksIFByb3BUeXBlcy5mdW5jXSksXG4gIHZvbHVtZTogUHJvcFR5cGVzLm51bWJlclxufTtcblxuZXhwb3J0IGRlZmF1bHQgU2F5QnV0dG9uXG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/SayUtterance.js":
+/*!****************************************************!*\
+  !*** ./node_modules/react-say/lib/SayUtterance.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutProperties.js"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+
+var _Composer = _interopRequireDefault(__webpack_require__(/*! ./Composer */ "./node_modules/react-say/lib/Composer.js"));
+
+var _createCustomEvent = _interopRequireDefault(__webpack_require__(/*! ./createCustomEvent */ "./node_modules/react-say/lib/createCustomEvent.js"));
+
+var _createErrorEvent = _interopRequireDefault(__webpack_require__(/*! ./createErrorEvent */ "./node_modules/react-say/lib/createErrorEvent.js"));
+
+var _migrateDeprecatedProps = _interopRequireDefault(__webpack_require__(/*! ./migrateDeprecatedProps */ "./node_modules/react-say/lib/migrateDeprecatedProps.js"));
+
+var _useSynthesize = _interopRequireDefault(__webpack_require__(/*! ./useSynthesize */ "./node_modules/react-say/lib/useSynthesize.js"));
+
+var _excluded = ["ponyfill"];
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var SayUtterance = function SayUtterance(props) {
+  var _migrateDeprecatedPro = (0, _migrateDeprecatedProps["default"])(props),
+      onEnd = _migrateDeprecatedPro.onEnd,
+      onError = _migrateDeprecatedPro.onError,
+      onStart = _migrateDeprecatedPro.onStart,
+      utterance = _migrateDeprecatedPro.utterance;
+
+  var started = (0, _react.useRef)(false);
+  var synthesize = (0, _useSynthesize["default"])(); // This useEffect() is essentially converting Promise-based useSynthesize() into events.
+
+  (0, _react.useEffect)(function () {
+    // After synthesis started, if utterance has changed, the event will be fired by the wrong target.
+    // Thus, we do not allow utterance to change after synthesis started.
+    if (started.current) {
+      // Since we have already cancelled the previous utterance, we are not starting a new one.
+      // This is because if we start a new one, we could fire onStart event twice, which sound confusing to the developer.
+      return console.warn('react-say: Should not change utterance after synthesis started.');
+    }
+
+    var cancelled;
+
+    var _synthesize = synthesize(utterance, function () {
+      started.current = true;
+      !cancelled && onStart && onStart((0, _createCustomEvent["default"])('start'));
+    }),
+        cancel = _synthesize.cancel,
+        promise = _synthesize.promise;
+
+    promise.then(function () {
+      return !cancelled && onEnd && onEnd((0, _createCustomEvent["default"])('end'));
+    }, function (error) {
+      return !cancelled && onError && onError((0, _createErrorEvent["default"])(error));
+    });
+    return function () {
+      cancelled = true;
+      cancel();
+    };
+  }, []);
+  return false;
+};
+
+SayUtterance.defaultProps = {
+  onEnd: undefined,
+  onError: undefined,
+  onStart: undefined
+};
+SayUtterance.propTypes = {
+  onEnd: _propTypes["default"].func,
+  onError: _propTypes["default"].func,
+  onStart: _propTypes["default"].func
+};
+
+var SayUtteranceWithContext = function SayUtteranceWithContext(_ref) {
+  var ponyfill = _ref.ponyfill,
+      props = (0, _objectWithoutProperties2["default"])(_ref, _excluded);
+  return /*#__PURE__*/_react["default"].createElement(_Composer["default"], {
+    ponyfill: ponyfill
+  }, /*#__PURE__*/_react["default"].createElement(SayUtterance, props));
+};
+
+SayUtteranceWithContext.defaultProps = _objectSpread(_objectSpread({}, SayUtterance.defaultProps), {}, {
+  ponyfill: undefined
+});
+SayUtteranceWithContext.propTypes = _objectSpread(_objectSpread({}, SayUtterance.propTypes), {}, {
+  ponyfill: _propTypes["default"].shape({
+    speechSynthesis: _propTypes["default"].any.isRequired,
+    SpeechSynthesisUtterance: _propTypes["default"].any.isRequired
+  })
+});
+var _default = SayUtteranceWithContext;
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9TYXlVdHRlcmFuY2UuanMiXSwibmFtZXMiOlsiU2F5VXR0ZXJhbmNlIiwicHJvcHMiLCJvbkVuZCIsIm9uRXJyb3IiLCJvblN0YXJ0IiwidXR0ZXJhbmNlIiwic3RhcnRlZCIsInN5bnRoZXNpemUiLCJjdXJyZW50IiwiY29uc29sZSIsIndhcm4iLCJjYW5jZWxsZWQiLCJjYW5jZWwiLCJwcm9taXNlIiwidGhlbiIsImVycm9yIiwiZGVmYXVsdFByb3BzIiwidW5kZWZpbmVkIiwicHJvcFR5cGVzIiwiUHJvcFR5cGVzIiwiZnVuYyIsIlNheVV0dGVyYW5jZVdpdGhDb250ZXh0IiwicG9ueWZpbGwiLCJzaGFwZSIsInNwZWVjaFN5bnRoZXNpcyIsImFueSIsImlzUmVxdWlyZWQiLCJTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztBQUNBOztBQUVBOztBQUNBOztBQUNBOztBQUNBOztBQUNBOzs7Ozs7Ozs7Ozs7QUFFQSxJQUFNQSxZQUFZLEdBQUcsU0FBZkEsWUFBZSxDQUFBQyxLQUFLLEVBQUk7QUFDNUIsOEJBS0ksd0NBQXVCQSxLQUF2QixDQUxKO0FBQUEsTUFDRUMsS0FERix5QkFDRUEsS0FERjtBQUFBLE1BRUVDLE9BRkYseUJBRUVBLE9BRkY7QUFBQSxNQUdFQyxPQUhGLHlCQUdFQSxPQUhGO0FBQUEsTUFJRUMsU0FKRix5QkFJRUEsU0FKRjs7QUFPQSxNQUFNQyxPQUFPLEdBQUcsbUJBQU8sS0FBUCxDQUFoQjtBQUNBLE1BQU1DLFVBQVUsR0FBRyxnQ0FBbkIsQ0FUNEIsQ0FXNUI7O0FBQ0Esd0JBQVUsWUFBTTtBQUNkO0FBQ0E7QUFDQSxRQUFJRCxPQUFPLENBQUNFLE9BQVosRUFBcUI7QUFDbkI7QUFDQTtBQUVBLGFBQU9DLE9BQU8sQ0FBQ0MsSUFBUixDQUFhLGlFQUFiLENBQVA7QUFDRDs7QUFFRCxRQUFJQyxTQUFKOztBQUNBLHNCQUE0QkosVUFBVSxDQUFDRixTQUFELEVBQVksWUFBTTtBQUN0REMsTUFBQUEsT0FBTyxDQUFDRSxPQUFSLEdBQWtCLElBQWxCO0FBQ0EsT0FBQ0csU0FBRCxJQUFjUCxPQUFkLElBQXlCQSxPQUFPLENBQUMsbUNBQWtCLE9BQWxCLENBQUQsQ0FBaEM7QUFDRCxLQUhxQyxDQUF0QztBQUFBLFFBQVFRLE1BQVIsZUFBUUEsTUFBUjtBQUFBLFFBQWdCQyxPQUFoQixlQUFnQkEsT0FBaEI7O0FBS0FBLElBQUFBLE9BQU8sQ0FBQ0MsSUFBUixDQUNFO0FBQUEsYUFBTSxDQUFDSCxTQUFELElBQWNULEtBQWQsSUFBdUJBLEtBQUssQ0FBQyxtQ0FBa0IsS0FBbEIsQ0FBRCxDQUFsQztBQUFBLEtBREYsRUFFRSxVQUFBYSxLQUFLO0FBQUEsYUFBSSxDQUFDSixTQUFELElBQWNSLE9BQWQsSUFBeUJBLE9BQU8sQ0FBQyxrQ0FBaUJZLEtBQWpCLENBQUQsQ0FBcEM7QUFBQSxLQUZQO0FBS0EsV0FBTyxZQUFNO0FBQ1hKLE1BQUFBLFNBQVMsR0FBRyxJQUFaO0FBQ0FDLE1BQUFBLE1BQU07QUFDUCxLQUhEO0FBSUQsR0F6QkQsRUF5QkcsRUF6Qkg7QUEyQkEsU0FBTyxLQUFQO0FBQ0QsQ0F4Q0Q7O0FBMENBWixZQUFZLENBQUNnQixZQUFiLEdBQTRCO0FBQzFCZCxFQUFBQSxLQUFLLEVBQUVlLFNBRG1CO0FBRTFCZCxFQUFBQSxPQUFPLEVBQUVjLFNBRmlCO0FBRzFCYixFQUFBQSxPQUFPLEVBQUVhO0FBSGlCLENBQTVCO0FBTUFqQixZQUFZLENBQUNrQixTQUFiLEdBQXlCO0FBQ3ZCaEIsRUFBQUEsS0FBSyxFQUFFaUIsc0JBQVVDLElBRE07QUFFdkJqQixFQUFBQSxPQUFPLEVBQUVnQixzQkFBVUMsSUFGSTtBQUd2QmhCLEVBQUFBLE9BQU8sRUFBRWUsc0JBQVVDO0FBSEksQ0FBekI7O0FBTUEsSUFBTUMsdUJBQXVCLEdBQUcsU0FBMUJBLHVCQUEwQjtBQUFBLE1BQUdDLFFBQUgsUUFBR0EsUUFBSDtBQUFBLE1BQWdCckIsS0FBaEI7QUFBQSxzQkFDOUIsZ0NBQUMsb0JBQUQ7QUFBVSxJQUFBLFFBQVEsRUFBR3FCO0FBQXJCLGtCQUNFLGdDQUFDLFlBQUQsRUFBbUJyQixLQUFuQixDQURGLENBRDhCO0FBQUEsQ0FBaEM7O0FBTUFvQix1QkFBdUIsQ0FBQ0wsWUFBeEIsbUNBQ0toQixZQUFZLENBQUNnQixZQURsQjtBQUVFTSxFQUFBQSxRQUFRLEVBQUVMO0FBRlo7QUFLQUksdUJBQXVCLENBQUNILFNBQXhCLG1DQUNLbEIsWUFBWSxDQUFDa0IsU0FEbEI7QUFFRUksRUFBQUEsUUFBUSxFQUFFSCxzQkFBVUksS0FBVixDQUFnQjtBQUN4QkMsSUFBQUEsZUFBZSxFQUFFTCxzQkFBVU0sR0FBVixDQUFjQyxVQURQO0FBRXhCQyxJQUFBQSx3QkFBd0IsRUFBRVIsc0JBQVVNLEdBQVYsQ0FBY0M7QUFGaEIsR0FBaEI7QUFGWjtlQVFlTCx1QiIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBQcm9wVHlwZXMgZnJvbSAncHJvcC10eXBlcyc7XG5pbXBvcnQgUmVhY3QsIHsgdXNlRWZmZWN0LCB1c2VSZWYgfSBmcm9tICdyZWFjdCc7XG5cbmltcG9ydCBDb21wb3NlciBmcm9tICcuL0NvbXBvc2VyJztcbmltcG9ydCBjcmVhdGVDdXN0b21FdmVudCBmcm9tICcuL2NyZWF0ZUN1c3RvbUV2ZW50JztcbmltcG9ydCBjcmVhdGVFcnJvckV2ZW50IGZyb20gJy4vY3JlYXRlRXJyb3JFdmVudCc7XG5pbXBvcnQgbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyBmcm9tICcuL21pZ3JhdGVEZXByZWNhdGVkUHJvcHMnO1xuaW1wb3J0IHVzZVN5bnRoZXNpemUgZnJvbSAnLi91c2VTeW50aGVzaXplJztcblxuY29uc3QgU2F5VXR0ZXJhbmNlID0gcHJvcHMgPT4ge1xuICBjb25zdCB7XG4gICAgb25FbmQsXG4gICAgb25FcnJvcixcbiAgICBvblN0YXJ0LFxuICAgIHV0dGVyYW5jZVxuICB9ID0gbWlncmF0ZURlcHJlY2F0ZWRQcm9wcyhwcm9wcyk7XG5cbiAgY29uc3Qgc3RhcnRlZCA9IHVzZVJlZihmYWxzZSk7XG4gIGNvbnN0IHN5bnRoZXNpemUgPSB1c2VTeW50aGVzaXplKCk7XG5cbiAgLy8gVGhpcyB1c2VFZmZlY3QoKSBpcyBlc3NlbnRpYWxseSBjb252ZXJ0aW5nIFByb21pc2UtYmFzZWQgdXNlU3ludGhlc2l6ZSgpIGludG8gZXZlbnRzLlxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIC8vIEFmdGVyIHN5bnRoZXNpcyBzdGFydGVkLCBpZiB1dHRlcmFuY2UgaGFzIGNoYW5nZWQsIHRoZSBldmVudCB3aWxsIGJlIGZpcmVkIGJ5IHRoZSB3cm9uZyB0YXJnZXQuXG4gICAgLy8gVGh1cywgd2UgZG8gbm90IGFsbG93IHV0dGVyYW5jZSB0byBjaGFuZ2UgYWZ0ZXIgc3ludGhlc2lzIHN0YXJ0ZWQuXG4gICAgaWYgKHN0YXJ0ZWQuY3VycmVudCkge1xuICAgICAgLy8gU2luY2Ugd2UgaGF2ZSBhbHJlYWR5IGNhbmNlbGxlZCB0aGUgcHJldmlvdXMgdXR0ZXJhbmNlLCB3ZSBhcmUgbm90IHN0YXJ0aW5nIGEgbmV3IG9uZS5cbiAgICAgIC8vIFRoaXMgaXMgYmVjYXVzZSBpZiB3ZSBzdGFydCBhIG5ldyBvbmUsIHdlIGNvdWxkIGZpcmUgb25TdGFydCBldmVudCB0d2ljZSwgd2hpY2ggc291bmQgY29uZnVzaW5nIHRvIHRoZSBkZXZlbG9wZXIuXG5cbiAgICAgIHJldHVybiBjb25zb2xlLndhcm4oJ3JlYWN0LXNheTogU2hvdWxkIG5vdCBjaGFuZ2UgdXR0ZXJhbmNlIGFmdGVyIHN5bnRoZXNpcyBzdGFydGVkLicpO1xuICAgIH1cblxuICAgIGxldCBjYW5jZWxsZWQ7XG4gICAgY29uc3QgeyBjYW5jZWwsIHByb21pc2UgfSA9IHN5bnRoZXNpemUodXR0ZXJhbmNlLCAoKSA9PiB7XG4gICAgICBzdGFydGVkLmN1cnJlbnQgPSB0cnVlO1xuICAgICAgIWNhbmNlbGxlZCAmJiBvblN0YXJ0ICYmIG9uU3RhcnQoY3JlYXRlQ3VzdG9tRXZlbnQoJ3N0YXJ0JykpO1xuICAgIH0pO1xuXG4gICAgcHJvbWlzZS50aGVuKFxuICAgICAgKCkgPT4gIWNhbmNlbGxlZCAmJiBvbkVuZCAmJiBvbkVuZChjcmVhdGVDdXN0b21FdmVudCgnZW5kJykpLFxuICAgICAgZXJyb3IgPT4gIWNhbmNlbGxlZCAmJiBvbkVycm9yICYmIG9uRXJyb3IoY3JlYXRlRXJyb3JFdmVudChlcnJvcikpXG4gICAgKTtcblxuICAgIHJldHVybiAoKSA9PiB7XG4gICAgICBjYW5jZWxsZWQgPSB0cnVlO1xuICAgICAgY2FuY2VsKCk7XG4gICAgfTtcbiAgfSwgW10pO1xuXG4gIHJldHVybiBmYWxzZTtcbn07XG5cblNheVV0dGVyYW5jZS5kZWZhdWx0UHJvcHMgPSB7XG4gIG9uRW5kOiB1bmRlZmluZWQsXG4gIG9uRXJyb3I6IHVuZGVmaW5lZCxcbiAgb25TdGFydDogdW5kZWZpbmVkXG59O1xuXG5TYXlVdHRlcmFuY2UucHJvcFR5cGVzID0ge1xuICBvbkVuZDogUHJvcFR5cGVzLmZ1bmMsXG4gIG9uRXJyb3I6IFByb3BUeXBlcy5mdW5jLFxuICBvblN0YXJ0OiBQcm9wVHlwZXMuZnVuY1xufTtcblxuY29uc3QgU2F5VXR0ZXJhbmNlV2l0aENvbnRleHQgPSAoeyBwb255ZmlsbCwgLi4ucHJvcHMgfSkgPT4gKFxuICA8Q29tcG9zZXIgcG9ueWZpbGw9eyBwb255ZmlsbCB9PlxuICAgIDxTYXlVdHRlcmFuY2UgeyAuLi5wcm9wcyB9IC8+XG4gIDwvQ29tcG9zZXI+XG4pO1xuXG5TYXlVdHRlcmFuY2VXaXRoQ29udGV4dC5kZWZhdWx0UHJvcHMgPSB7XG4gIC4uLlNheVV0dGVyYW5jZS5kZWZhdWx0UHJvcHMsXG4gIHBvbnlmaWxsOiB1bmRlZmluZWRcbn07XG5cblNheVV0dGVyYW5jZVdpdGhDb250ZXh0LnByb3BUeXBlcyA9IHtcbiAgLi4uU2F5VXR0ZXJhbmNlLnByb3BUeXBlcyxcbiAgcG9ueWZpbGw6IFByb3BUeXBlcy5zaGFwZSh7XG4gICAgc3BlZWNoU3ludGhlc2lzOiBQcm9wVHlwZXMuYW55LmlzUmVxdWlyZWQsXG4gICAgU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlOiBQcm9wVHlwZXMuYW55LmlzUmVxdWlyZWRcbiAgfSlcbn07XG5cbmV4cG9ydCBkZWZhdWx0IFNheVV0dGVyYW5jZVdpdGhDb250ZXh0XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/createCustomEvent.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/react-say/lib/createCustomEvent.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = createCustomEvent;
+
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/slicedToArray.js"));
+
+function createCustomEvent(name, eventInitDict) {
+  if (name === 'error') {
+    if (typeof ErrorEvent === 'function') {
+      return new ErrorEvent(name, eventInitDict);
+    }
+  } else if (typeof CustomEvent === 'function') {
+    return new CustomEvent(name, eventInitDict);
+  }
+
+  var event = document.createEvent('Event');
+  event.initEvent(name, true, true);
+  Object.entries(eventInitDict || {}).forEach(function (_ref) {
+    var _ref2 = (0, _slicedToArray2["default"])(_ref, 2),
+        key = _ref2[0],
+        value = _ref2[1];
+
+    event[key] = value;
+  });
+  return event;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jcmVhdGVDdXN0b21FdmVudC5qcyJdLCJuYW1lcyI6WyJjcmVhdGVDdXN0b21FdmVudCIsIm5hbWUiLCJldmVudEluaXREaWN0IiwiRXJyb3JFdmVudCIsIkN1c3RvbUV2ZW50IiwiZXZlbnQiLCJkb2N1bWVudCIsImNyZWF0ZUV2ZW50IiwiaW5pdEV2ZW50IiwiT2JqZWN0IiwiZW50cmllcyIsImZvckVhY2giLCJrZXkiLCJ2YWx1ZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFBZSxTQUFTQSxpQkFBVCxDQUEyQkMsSUFBM0IsRUFBaUNDLGFBQWpDLEVBQWdEO0FBQzdELE1BQUlELElBQUksS0FBSyxPQUFiLEVBQXNCO0FBQ3BCLFFBQUksT0FBT0UsVUFBUCxLQUFzQixVQUExQixFQUFzQztBQUNwQyxhQUFPLElBQUlBLFVBQUosQ0FBZUYsSUFBZixFQUFxQkMsYUFBckIsQ0FBUDtBQUNEO0FBQ0YsR0FKRCxNQUlPLElBQUksT0FBT0UsV0FBUCxLQUF1QixVQUEzQixFQUF1QztBQUM1QyxXQUFPLElBQUlBLFdBQUosQ0FBZ0JILElBQWhCLEVBQXNCQyxhQUF0QixDQUFQO0FBQ0Q7O0FBRUQsTUFBTUcsS0FBSyxHQUFHQyxRQUFRLENBQUNDLFdBQVQsQ0FBcUIsT0FBckIsQ0FBZDtBQUVBRixFQUFBQSxLQUFLLENBQUNHLFNBQU4sQ0FBZ0JQLElBQWhCLEVBQXNCLElBQXRCLEVBQTRCLElBQTVCO0FBRUFRLEVBQUFBLE1BQU0sQ0FBQ0MsT0FBUCxDQUFlUixhQUFhLElBQUksRUFBaEMsRUFBb0NTLE9BQXBDLENBQTRDLGdCQUFrQjtBQUFBO0FBQUEsUUFBaEJDLEdBQWdCO0FBQUEsUUFBWEMsS0FBVzs7QUFDNURSLElBQUFBLEtBQUssQ0FBQ08sR0FBRCxDQUFMLEdBQWFDLEtBQWI7QUFDRCxHQUZEO0FBSUEsU0FBT1IsS0FBUDtBQUNEIiwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gY3JlYXRlQ3VzdG9tRXZlbnQobmFtZSwgZXZlbnRJbml0RGljdCkge1xuICBpZiAobmFtZSA9PT0gJ2Vycm9yJykge1xuICAgIGlmICh0eXBlb2YgRXJyb3JFdmVudCA9PT0gJ2Z1bmN0aW9uJykge1xuICAgICAgcmV0dXJuIG5ldyBFcnJvckV2ZW50KG5hbWUsIGV2ZW50SW5pdERpY3QpO1xuICAgIH1cbiAgfSBlbHNlIGlmICh0eXBlb2YgQ3VzdG9tRXZlbnQgPT09ICdmdW5jdGlvbicpIHtcbiAgICByZXR1cm4gbmV3IEN1c3RvbUV2ZW50KG5hbWUsIGV2ZW50SW5pdERpY3QpO1xuICB9XG5cbiAgY29uc3QgZXZlbnQgPSBkb2N1bWVudC5jcmVhdGVFdmVudCgnRXZlbnQnKTtcblxuICBldmVudC5pbml0RXZlbnQobmFtZSwgdHJ1ZSwgdHJ1ZSk7XG5cbiAgT2JqZWN0LmVudHJpZXMoZXZlbnRJbml0RGljdCB8fCB7fSkuZm9yRWFjaCgoW2tleSwgdmFsdWVdKSA9PiB7XG4gICAgZXZlbnRba2V5XSA9IHZhbHVlO1xuICB9KTtcblxuICByZXR1cm4gZXZlbnQ7XG59XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/createDeferred.js":
+/*!******************************************************!*\
+  !*** ./node_modules/react-say/lib/createDeferred.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = createDeferred;
+
+function createDeferred() {
+  var reject, resolve;
+  var promise = new Promise(function (promiseResolve, promiseReject) {
+    reject = promiseReject;
+    resolve = promiseResolve;
+  });
+
+  if (!reject || !resolve) {
+    throw new Error('Promise is not a ES-compliant and do not run exector immediately');
+  }
+
+  return {
+    promise: promise,
+    reject: reject,
+    resolve: resolve
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jcmVhdGVEZWZlcnJlZC5qcyJdLCJuYW1lcyI6WyJjcmVhdGVEZWZlcnJlZCIsInJlamVjdCIsInJlc29sdmUiLCJwcm9taXNlIiwiUHJvbWlzZSIsInByb21pc2VSZXNvbHZlIiwicHJvbWlzZVJlamVjdCIsIkVycm9yIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBQWUsU0FBU0EsY0FBVCxHQUEwQjtBQUN2QyxNQUFJQyxNQUFKLEVBQVlDLE9BQVo7QUFFQSxNQUFNQyxPQUFPLEdBQUcsSUFBSUMsT0FBSixDQUFZLFVBQUNDLGNBQUQsRUFBaUJDLGFBQWpCLEVBQW1DO0FBQzdETCxJQUFBQSxNQUFNLEdBQUdLLGFBQVQ7QUFDQUosSUFBQUEsT0FBTyxHQUFHRyxjQUFWO0FBQ0QsR0FIZSxDQUFoQjs7QUFLQSxNQUFJLENBQUNKLE1BQUQsSUFBVyxDQUFDQyxPQUFoQixFQUF5QjtBQUN2QixVQUFNLElBQUlLLEtBQUosQ0FBVSxrRUFBVixDQUFOO0FBQ0Q7O0FBRUQsU0FBTztBQUFFSixJQUFBQSxPQUFPLEVBQVBBLE9BQUY7QUFBV0YsSUFBQUEsTUFBTSxFQUFOQSxNQUFYO0FBQW1CQyxJQUFBQSxPQUFPLEVBQVBBO0FBQW5CLEdBQVA7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIGNyZWF0ZURlZmVycmVkKCkge1xuICBsZXQgcmVqZWN0LCByZXNvbHZlO1xuXG4gIGNvbnN0IHByb21pc2UgPSBuZXcgUHJvbWlzZSgocHJvbWlzZVJlc29sdmUsIHByb21pc2VSZWplY3QpID0+IHtcbiAgICByZWplY3QgPSBwcm9taXNlUmVqZWN0O1xuICAgIHJlc29sdmUgPSBwcm9taXNlUmVzb2x2ZTtcbiAgfSk7XG5cbiAgaWYgKCFyZWplY3QgfHwgIXJlc29sdmUpIHtcbiAgICB0aHJvdyBuZXcgRXJyb3IoJ1Byb21pc2UgaXMgbm90IGEgRVMtY29tcGxpYW50IGFuZCBkbyBub3QgcnVuIGV4ZWN0b3IgaW1tZWRpYXRlbHknKTtcbiAgfVxuXG4gIHJldHVybiB7IHByb21pc2UsIHJlamVjdCwgcmVzb2x2ZSB9O1xufVxuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/createErrorEvent.js":
+/*!********************************************************!*\
+  !*** ./node_modules/react-say/lib/createErrorEvent.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = createErrorEvent;
+
+var _createCustomEvent = _interopRequireDefault(__webpack_require__(/*! ./createCustomEvent */ "./node_modules/react-say/lib/createCustomEvent.js"));
+
+function createErrorEvent(error) {
+  return (0, _createCustomEvent["default"])('error', {
+    error: error
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jcmVhdGVFcnJvckV2ZW50LmpzIl0sIm5hbWVzIjpbImNyZWF0ZUVycm9yRXZlbnQiLCJlcnJvciJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7O0FBRWUsU0FBU0EsZ0JBQVQsQ0FBMEJDLEtBQTFCLEVBQWlDO0FBQzlDLFNBQU8sbUNBQWtCLE9BQWxCLEVBQTJCO0FBQUVBLElBQUFBLEtBQUssRUFBTEE7QUFBRixHQUEzQixDQUFQO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgY3JlYXRlQ3VzdG9tRXZlbnQgZnJvbSAnLi9jcmVhdGVDdXN0b21FdmVudCc7XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIGNyZWF0ZUVycm9yRXZlbnQoZXJyb3IpIHtcbiAgcmV0dXJuIGNyZWF0ZUN1c3RvbUV2ZW50KCdlcnJvcicsIHsgZXJyb3IgfSk7XG59XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/createNativeUtterance.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/react-say/lib/createNativeUtterance.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = createNativeUtterance;
+
+function createNativeUtterance(_ref, _ref2) {
+  var speechSynthesis = _ref.speechSynthesis,
+      SpeechSynthesisUtterance = _ref.SpeechSynthesisUtterance;
+  var lang = _ref2.lang,
+      onBoundary = _ref2.onBoundary,
+      pitch = _ref2.pitch,
+      rate = _ref2.rate,
+      text = _ref2.text,
+      voice = _ref2.voice,
+      volume = _ref2.volume;
+  var utterance = new SpeechSynthesisUtterance(text);
+  var targetVoice;
+
+  if (typeof voice === 'function') {
+    targetVoice = voice.call(speechSynthesis, speechSynthesis.getVoices());
+  } else {
+    var _ref3 = voice || {},
+        voiceURI = _ref3.voiceURI;
+
+    targetVoice = voiceURI && [].find.call([].slice.call(speechSynthesis.getVoices()), function (v) {
+      return v.voiceURI === voiceURI;
+    });
+  } // Edge will mute if "lang" is set to ""
+
+
+  utterance.lang = lang || '';
+
+  if (pitch || pitch === 0) {
+    utterance.pitch = pitch;
+  }
+
+  if (rate || rate === 0) {
+    utterance.rate = rate;
+  } // Cognitive Services will error when "voice" is set to "null"
+  // Edge will error when "voice" is set to "undefined"
+
+
+  if (targetVoice) {
+    utterance.voice = targetVoice;
+  }
+
+  if (volume || volume === 0) {
+    utterance.volume = volume;
+  } // Since browser quirks, start/error/end events are emulated for best compatibility
+  // start/error/end events are emulated in QueuedUtterance
+
+
+  onBoundary && utterance.addEventListener('boundary', onBoundary); // onEnd && utterance.addEventListener('end', onEnd);
+  // onError && utterance.addEventListener('error', onError);
+  // onStart && utterance.addEventListener('start', onStart);
+
+  return utterance;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jcmVhdGVOYXRpdmVVdHRlcmFuY2UuanMiXSwibmFtZXMiOlsiY3JlYXRlTmF0aXZlVXR0ZXJhbmNlIiwic3BlZWNoU3ludGhlc2lzIiwiU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlIiwibGFuZyIsIm9uQm91bmRhcnkiLCJwaXRjaCIsInJhdGUiLCJ0ZXh0Iiwidm9pY2UiLCJ2b2x1bWUiLCJ1dHRlcmFuY2UiLCJ0YXJnZXRWb2ljZSIsImNhbGwiLCJnZXRWb2ljZXMiLCJ2b2ljZVVSSSIsImZpbmQiLCJzbGljZSIsInYiLCJhZGRFdmVudExpc3RlbmVyIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBQWUsU0FBU0EscUJBQVQsY0FjYjtBQUFBLE1BWkVDLGVBWUYsUUFaRUEsZUFZRjtBQUFBLE1BWEVDLHdCQVdGLFFBWEVBLHdCQVdGO0FBQUEsTUFSRUMsSUFRRixTQVJFQSxJQVFGO0FBQUEsTUFQRUMsVUFPRixTQVBFQSxVQU9GO0FBQUEsTUFORUMsS0FNRixTQU5FQSxLQU1GO0FBQUEsTUFMRUMsSUFLRixTQUxFQSxJQUtGO0FBQUEsTUFKRUMsSUFJRixTQUpFQSxJQUlGO0FBQUEsTUFIRUMsS0FHRixTQUhFQSxLQUdGO0FBQUEsTUFGRUMsTUFFRixTQUZFQSxNQUVGO0FBQ0EsTUFBTUMsU0FBUyxHQUFHLElBQUlSLHdCQUFKLENBQTZCSyxJQUE3QixDQUFsQjtBQUNBLE1BQUlJLFdBQUo7O0FBRUEsTUFBSSxPQUFPSCxLQUFQLEtBQWlCLFVBQXJCLEVBQWlDO0FBQy9CRyxJQUFBQSxXQUFXLEdBQUdILEtBQUssQ0FBQ0ksSUFBTixDQUFXWCxlQUFYLEVBQTRCQSxlQUFlLENBQUNZLFNBQWhCLEVBQTVCLENBQWQ7QUFDRCxHQUZELE1BRU87QUFDTCxnQkFBcUJMLEtBQUssSUFBSSxFQUE5QjtBQUFBLFFBQVFNLFFBQVIsU0FBUUEsUUFBUjs7QUFFQUgsSUFBQUEsV0FBVyxHQUFHRyxRQUFRLElBQUksR0FBR0MsSUFBSCxDQUFRSCxJQUFSLENBQWEsR0FBR0ksS0FBSCxDQUFTSixJQUFULENBQWNYLGVBQWUsQ0FBQ1ksU0FBaEIsRUFBZCxDQUFiLEVBQXlELFVBQUFJLENBQUM7QUFBQSxhQUFJQSxDQUFDLENBQUNILFFBQUYsS0FBZUEsUUFBbkI7QUFBQSxLQUExRCxDQUExQjtBQUNELEdBVkQsQ0FZQTs7O0FBQ0FKLEVBQUFBLFNBQVMsQ0FBQ1AsSUFBVixHQUFpQkEsSUFBSSxJQUFJLEVBQXpCOztBQUVBLE1BQUlFLEtBQUssSUFBSUEsS0FBSyxLQUFLLENBQXZCLEVBQTBCO0FBQ3hCSyxJQUFBQSxTQUFTLENBQUNMLEtBQVYsR0FBa0JBLEtBQWxCO0FBQ0Q7O0FBRUQsTUFBSUMsSUFBSSxJQUFJQSxJQUFJLEtBQUssQ0FBckIsRUFBd0I7QUFDdEJJLElBQUFBLFNBQVMsQ0FBQ0osSUFBVixHQUFpQkEsSUFBakI7QUFDRCxHQXJCRCxDQXVCQTtBQUNBOzs7QUFDQSxNQUFJSyxXQUFKLEVBQWlCO0FBQ2ZELElBQUFBLFNBQVMsQ0FBQ0YsS0FBVixHQUFrQkcsV0FBbEI7QUFDRDs7QUFFRCxNQUFJRixNQUFNLElBQUlBLE1BQU0sS0FBSyxDQUF6QixFQUE0QjtBQUMxQkMsSUFBQUEsU0FBUyxDQUFDRCxNQUFWLEdBQW1CQSxNQUFuQjtBQUNELEdBL0JELENBaUNBO0FBQ0E7OztBQUVBTCxFQUFBQSxVQUFVLElBQUlNLFNBQVMsQ0FBQ1EsZ0JBQVYsQ0FBMkIsVUFBM0IsRUFBdUNkLFVBQXZDLENBQWQsQ0FwQ0EsQ0FxQ0E7QUFDQTtBQUNBOztBQUVBLFNBQU9NLFNBQVA7QUFDRCIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIGNyZWF0ZU5hdGl2ZVV0dGVyYW5jZShcbiAge1xuICAgIHNwZWVjaFN5bnRoZXNpcyxcbiAgICBTcGVlY2hTeW50aGVzaXNVdHRlcmFuY2VcbiAgfSxcbiAge1xuICAgIGxhbmcsXG4gICAgb25Cb3VuZGFyeSxcbiAgICBwaXRjaCxcbiAgICByYXRlLFxuICAgIHRleHQsXG4gICAgdm9pY2UsXG4gICAgdm9sdW1lXG4gIH1cbikge1xuICBjb25zdCB1dHRlcmFuY2UgPSBuZXcgU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlKHRleHQpO1xuICBsZXQgdGFyZ2V0Vm9pY2U7XG5cbiAgaWYgKHR5cGVvZiB2b2ljZSA9PT0gJ2Z1bmN0aW9uJykge1xuICAgIHRhcmdldFZvaWNlID0gdm9pY2UuY2FsbChzcGVlY2hTeW50aGVzaXMsIHNwZWVjaFN5bnRoZXNpcy5nZXRWb2ljZXMoKSk7XG4gIH0gZWxzZSB7XG4gICAgY29uc3QgeyB2b2ljZVVSSSB9ID0gdm9pY2UgfHwge307XG5cbiAgICB0YXJnZXRWb2ljZSA9IHZvaWNlVVJJICYmIFtdLmZpbmQuY2FsbChbXS5zbGljZS5jYWxsKHNwZWVjaFN5bnRoZXNpcy5nZXRWb2ljZXMoKSksIHYgPT4gdi52b2ljZVVSSSA9PT0gdm9pY2VVUkkpO1xuICB9XG5cbiAgLy8gRWRnZSB3aWxsIG11dGUgaWYgXCJsYW5nXCIgaXMgc2V0IHRvIFwiXCJcbiAgdXR0ZXJhbmNlLmxhbmcgPSBsYW5nIHx8ICcnO1xuXG4gIGlmIChwaXRjaCB8fCBwaXRjaCA9PT0gMCkge1xuICAgIHV0dGVyYW5jZS5waXRjaCA9IHBpdGNoO1xuICB9XG5cbiAgaWYgKHJhdGUgfHwgcmF0ZSA9PT0gMCkge1xuICAgIHV0dGVyYW5jZS5yYXRlID0gcmF0ZTtcbiAgfVxuXG4gIC8vIENvZ25pdGl2ZSBTZXJ2aWNlcyB3aWxsIGVycm9yIHdoZW4gXCJ2b2ljZVwiIGlzIHNldCB0byBcIm51bGxcIlxuICAvLyBFZGdlIHdpbGwgZXJyb3Igd2hlbiBcInZvaWNlXCIgaXMgc2V0IHRvIFwidW5kZWZpbmVkXCJcbiAgaWYgKHRhcmdldFZvaWNlKSB7XG4gICAgdXR0ZXJhbmNlLnZvaWNlID0gdGFyZ2V0Vm9pY2U7XG4gIH1cblxuICBpZiAodm9sdW1lIHx8IHZvbHVtZSA9PT0gMCkge1xuICAgIHV0dGVyYW5jZS52b2x1bWUgPSB2b2x1bWU7XG4gIH1cblxuICAvLyBTaW5jZSBicm93c2VyIHF1aXJrcywgc3RhcnQvZXJyb3IvZW5kIGV2ZW50cyBhcmUgZW11bGF0ZWQgZm9yIGJlc3QgY29tcGF0aWJpbGl0eVxuICAvLyBzdGFydC9lcnJvci9lbmQgZXZlbnRzIGFyZSBlbXVsYXRlZCBpbiBRdWV1ZWRVdHRlcmFuY2VcblxuICBvbkJvdW5kYXJ5ICYmIHV0dGVyYW5jZS5hZGRFdmVudExpc3RlbmVyKCdib3VuZGFyeScsIG9uQm91bmRhcnkpO1xuICAvLyBvbkVuZCAmJiB1dHRlcmFuY2UuYWRkRXZlbnRMaXN0ZW5lcignZW5kJywgb25FbmQpO1xuICAvLyBvbkVycm9yICYmIHV0dGVyYW5jZS5hZGRFdmVudExpc3RlbmVyKCdlcnJvcicsIG9uRXJyb3IpO1xuICAvLyBvblN0YXJ0ICYmIHV0dGVyYW5jZS5hZGRFdmVudExpc3RlbmVyKCdzdGFydCcsIG9uU3RhcnQpO1xuXG4gIHJldHVybiB1dHRlcmFuY2U7XG59XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/createSynthesize.js":
+/*!********************************************************!*\
+  !*** ./node_modules/react-say/lib/createSynthesize.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = createSynthesize;
+
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/react-say/node_modules/@babel/runtime/regenerator/index.js"));
+
+var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/toConsumableArray.js"));
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
+
+var _QueuedUtterance = _interopRequireDefault(__webpack_require__(/*! ./QueuedUtterance */ "./node_modules/react-say/lib/QueuedUtterance.js"));
+
+function createSynthesize() {
+  var queueWithCurrent = [];
+  var running;
+
+  var run = /*#__PURE__*/function () {
+    var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
+      return _regenerator["default"].wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (!running) {
+                _context2.next = 2;
+                break;
+              }
+
+              return _context2.abrupt("return");
+
+            case 2:
+              running = true;
+              _context2.prev = 3;
+              return _context2.delegateYield( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+                var queuedUtterance;
+                return _regenerator["default"].wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        if (!(queuedUtterance = queueWithCurrent[0])) {
+                          _context.next = 12;
+                          break;
+                        }
+
+                        _context.prev = 1;
+                        _context.next = 4;
+                        return queuedUtterance.speak();
+
+                      case 4:
+                        _context.next = 9;
+                        break;
+
+                      case 6:
+                        _context.prev = 6;
+                        _context.t0 = _context["catch"](1);
+                        // TODO: If the error is due to Safari restriction on user touch
+                        //       The next loop on the next audio will also fail because it was not queued with a user touch
+                        _context.t0.message !== 'cancelled' && console.error(_context.t0);
+
+                      case 9:
+                        queueWithCurrent = queueWithCurrent.filter(function (target) {
+                          return target !== queuedUtterance;
+                        });
+                        _context.next = 0;
+                        break;
+
+                      case 12:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee, null, [[1, 6]]);
+              })(), "t0", 5);
+
+            case 5:
+              _context2.prev = 5;
+              running = false;
+              return _context2.finish(5);
+
+            case 8:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[3,, 5, 8]]);
+    }));
+
+    return function run() {
+      return _ref.apply(this, arguments);
+    };
+  }();
+
+  return function (ponyfill, utterance) {
+    var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        onEnd = _ref2.onEnd,
+        onError = _ref2.onError,
+        onStart = _ref2.onStart;
+
+    if (!(utterance instanceof ponyfill.SpeechSynthesisUtterance)) {
+      throw new Error('utterance must be instance of the ponyfill');
+    }
+
+    var queuedUtterance = new _QueuedUtterance["default"](ponyfill, utterance, {
+      onEnd: onEnd,
+      onError: onError,
+      onStart: onStart
+    });
+    queueWithCurrent = [].concat((0, _toConsumableArray2["default"])(queueWithCurrent), [queuedUtterance]);
+    run();
+    return {
+      // The cancel() function returns a Promise
+      cancel: function cancel() {
+        return queuedUtterance.cancel();
+      },
+      promise: queuedUtterance.promise
+    };
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jcmVhdGVTeW50aGVzaXplLmpzIl0sIm5hbWVzIjpbImNyZWF0ZVN5bnRoZXNpemUiLCJxdWV1ZVdpdGhDdXJyZW50IiwicnVubmluZyIsInJ1biIsInF1ZXVlZFV0dGVyYW5jZSIsInNwZWFrIiwibWVzc2FnZSIsImNvbnNvbGUiLCJlcnJvciIsImZpbHRlciIsInRhcmdldCIsInBvbnlmaWxsIiwidXR0ZXJhbmNlIiwib25FbmQiLCJvbkVycm9yIiwib25TdGFydCIsIlNwZWVjaFN5bnRoZXNpc1V0dGVyYW5jZSIsIkVycm9yIiwiUXVldWVkVXR0ZXJhbmNlIiwiY2FuY2VsIiwicHJvbWlzZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7O0FBRWUsU0FBU0EsZ0JBQVQsR0FBNEI7QUFDekMsTUFBSUMsZ0JBQWdCLEdBQUcsRUFBdkI7QUFDQSxNQUFJQyxPQUFKOztBQUVBLE1BQU1DLEdBQUc7QUFBQSw2RkFBRztBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQ05ELE9BRE07QUFBQTtBQUFBO0FBQUE7O0FBQUE7O0FBQUE7QUFLVkEsY0FBQUEsT0FBTyxHQUFHLElBQVY7QUFMVTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLDhCQVVBRSxlQUFlLEdBQUdILGdCQUFnQixDQUFDLENBQUQsQ0FWbEM7QUFBQTtBQUFBO0FBQUE7O0FBQUE7QUFBQTtBQUFBLCtCQVlFRyxlQUFlLENBQUNDLEtBQWhCLEVBWkY7O0FBQUE7QUFBQTtBQUFBOztBQUFBO0FBQUE7QUFBQTtBQWNKO0FBQ0E7QUFFQSxvQ0FBSUMsT0FBSixLQUFnQixXQUFoQixJQUErQkMsT0FBTyxDQUFDQyxLQUFSLGFBQS9COztBQWpCSTtBQW9CTlAsd0JBQUFBLGdCQUFnQixHQUFHQSxnQkFBZ0IsQ0FBQ1EsTUFBakIsQ0FBd0IsVUFBQUMsTUFBTTtBQUFBLGlDQUFJQSxNQUFNLEtBQUtOLGVBQWY7QUFBQSx5QkFBOUIsQ0FBbkI7QUFwQk07QUFBQTs7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTs7QUFBQTtBQUFBO0FBdUJSRixjQUFBQSxPQUFPLEdBQUcsS0FBVjtBQXZCUTs7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxLQUFIOztBQUFBLG9CQUFIQyxHQUFHO0FBQUE7QUFBQTtBQUFBLEtBQVQ7O0FBMkJBLFNBQU8sVUFBQ1EsUUFBRCxFQUFXQyxTQUFYLEVBQTJEO0FBQUEsb0ZBQVAsRUFBTztBQUFBLFFBQW5DQyxLQUFtQyxTQUFuQ0EsS0FBbUM7QUFBQSxRQUE1QkMsT0FBNEIsU0FBNUJBLE9BQTRCO0FBQUEsUUFBbkJDLE9BQW1CLFNBQW5CQSxPQUFtQjs7QUFDaEUsUUFBSSxFQUFFSCxTQUFTLFlBQVlELFFBQVEsQ0FBQ0ssd0JBQWhDLENBQUosRUFBK0Q7QUFDN0QsWUFBTSxJQUFJQyxLQUFKLENBQVUsNENBQVYsQ0FBTjtBQUNEOztBQUVELFFBQU1iLGVBQWUsR0FBRyxJQUFJYywyQkFBSixDQUFvQlAsUUFBcEIsRUFBOEJDLFNBQTlCLEVBQXlDO0FBQUVDLE1BQUFBLEtBQUssRUFBTEEsS0FBRjtBQUFTQyxNQUFBQSxPQUFPLEVBQVBBLE9BQVQ7QUFBa0JDLE1BQUFBLE9BQU8sRUFBUEE7QUFBbEIsS0FBekMsQ0FBeEI7QUFFQWQsSUFBQUEsZ0JBQWdCLGlEQUFPQSxnQkFBUCxJQUF5QkcsZUFBekIsRUFBaEI7QUFDQUQsSUFBQUEsR0FBRztBQUVILFdBQU87QUFDTDtBQUNBZ0IsTUFBQUEsTUFBTSxFQUFFO0FBQUEsZUFBTWYsZUFBZSxDQUFDZSxNQUFoQixFQUFOO0FBQUEsT0FGSDtBQUdMQyxNQUFBQSxPQUFPLEVBQUVoQixlQUFlLENBQUNnQjtBQUhwQixLQUFQO0FBS0QsR0FmRDtBQWdCRCIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBRdWV1ZWRVdHRlcmFuY2UgZnJvbSAnLi9RdWV1ZWRVdHRlcmFuY2UnO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBjcmVhdGVTeW50aGVzaXplKCkge1xuICBsZXQgcXVldWVXaXRoQ3VycmVudCA9IFtdO1xuICBsZXQgcnVubmluZztcblxuICBjb25zdCBydW4gPSBhc3luYyAoKSA9PiB7XG4gICAgaWYgKHJ1bm5pbmcpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBydW5uaW5nID0gdHJ1ZTtcblxuICAgIHRyeSB7XG4gICAgICBsZXQgcXVldWVkVXR0ZXJhbmNlO1xuXG4gICAgICB3aGlsZSAoKHF1ZXVlZFV0dGVyYW5jZSA9IHF1ZXVlV2l0aEN1cnJlbnRbMF0pKSB7XG4gICAgICAgIHRyeSB7XG4gICAgICAgICAgYXdhaXQgcXVldWVkVXR0ZXJhbmNlLnNwZWFrKCk7XG4gICAgICAgIH0gY2F0Y2ggKGVycikge1xuICAgICAgICAgIC8vIFRPRE86IElmIHRoZSBlcnJvciBpcyBkdWUgdG8gU2FmYXJpIHJlc3RyaWN0aW9uIG9uIHVzZXIgdG91Y2hcbiAgICAgICAgICAvLyAgICAgICBUaGUgbmV4dCBsb29wIG9uIHRoZSBuZXh0IGF1ZGlvIHdpbGwgYWxzbyBmYWlsIGJlY2F1c2UgaXQgd2FzIG5vdCBxdWV1ZWQgd2l0aCBhIHVzZXIgdG91Y2hcblxuICAgICAgICAgIGVyci5tZXNzYWdlICE9PSAnY2FuY2VsbGVkJyAmJiBjb25zb2xlLmVycm9yKGVycik7XG4gICAgICAgIH1cblxuICAgICAgICBxdWV1ZVdpdGhDdXJyZW50ID0gcXVldWVXaXRoQ3VycmVudC5maWx0ZXIodGFyZ2V0ID0+IHRhcmdldCAhPT0gcXVldWVkVXR0ZXJhbmNlKTtcbiAgICAgIH1cbiAgICB9IGZpbmFsbHkge1xuICAgICAgcnVubmluZyA9IGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiAocG9ueWZpbGwsIHV0dGVyYW5jZSwgeyBvbkVuZCwgb25FcnJvciwgb25TdGFydCB9ID0ge30pID0+IHtcbiAgICBpZiAoISh1dHRlcmFuY2UgaW5zdGFuY2VvZiBwb255ZmlsbC5TcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UpKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ3V0dGVyYW5jZSBtdXN0IGJlIGluc3RhbmNlIG9mIHRoZSBwb255ZmlsbCcpO1xuICAgIH1cblxuICAgIGNvbnN0IHF1ZXVlZFV0dGVyYW5jZSA9IG5ldyBRdWV1ZWRVdHRlcmFuY2UocG9ueWZpbGwsIHV0dGVyYW5jZSwgeyBvbkVuZCwgb25FcnJvciwgb25TdGFydCB9KTtcblxuICAgIHF1ZXVlV2l0aEN1cnJlbnQgPSBbLi4ucXVldWVXaXRoQ3VycmVudCwgcXVldWVkVXR0ZXJhbmNlXTtcbiAgICBydW4oKTtcblxuICAgIHJldHVybiB7XG4gICAgICAvLyBUaGUgY2FuY2VsKCkgZnVuY3Rpb24gcmV0dXJucyBhIFByb21pc2VcbiAgICAgIGNhbmNlbDogKCkgPT4gcXVldWVkVXR0ZXJhbmNlLmNhbmNlbCgpLFxuICAgICAgcHJvbWlzZTogcXVldWVkVXR0ZXJhbmNlLnByb21pc2VcbiAgICB9O1xuICB9O1xufVxuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/react-say/lib/index.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+Object.defineProperty(exports, "Composer", ({
+  enumerable: true,
+  get: function get() {
+    return _Composer["default"];
+  }
+}));
+Object.defineProperty(exports, "Context", ({
+  enumerable: true,
+  get: function get() {
+    return _Context["default"];
+  }
+}));
+Object.defineProperty(exports, "SayButton", ({
+  enumerable: true,
+  get: function get() {
+    return _SayButton["default"];
+  }
+}));
+Object.defineProperty(exports, "SayUtterance", ({
+  enumerable: true,
+  get: function get() {
+    return _SayUtterance["default"];
+  }
+}));
+exports["default"] = void 0;
+
+var _Say = _interopRequireDefault(__webpack_require__(/*! ./Say */ "./node_modules/react-say/lib/Say.js"));
+
+var _Composer = _interopRequireDefault(__webpack_require__(/*! ./Composer */ "./node_modules/react-say/lib/Composer.js"));
+
+var _Context = _interopRequireDefault(__webpack_require__(/*! ./Context */ "./node_modules/react-say/lib/Context.js"));
+
+var _SayButton = _interopRequireDefault(__webpack_require__(/*! ./SayButton */ "./node_modules/react-say/lib/SayButton.js"));
+
+var _SayUtterance = _interopRequireDefault(__webpack_require__(/*! ./SayUtterance */ "./node_modules/react-say/lib/SayUtterance.js"));
+
+var _default = _Say["default"];
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9pbmRleC5qcyJdLCJuYW1lcyI6WyJTYXkiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOztBQUNBOztBQUNBOztBQUNBOztBQUNBOztlQUVlQSxlIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFNheSBmcm9tICcuL1NheSc7XG5pbXBvcnQgQ29tcG9zZXIgZnJvbSAnLi9Db21wb3Nlcic7XG5pbXBvcnQgQ29udGV4dCBmcm9tICcuL0NvbnRleHQnO1xuaW1wb3J0IFNheUJ1dHRvbiBmcm9tICcuL1NheUJ1dHRvbic7XG5pbXBvcnQgU2F5VXR0ZXJhbmNlIGZyb20gJy4vU2F5VXR0ZXJhbmNlJztcblxuZXhwb3J0IGRlZmF1bHQgU2F5XG5cbmV4cG9ydCB7XG4gIENvbXBvc2VyLFxuICBDb250ZXh0LFxuICBTYXlCdXR0b24sXG4gIFNheVV0dGVyYW5jZVxufVxuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/migrateDeprecatedProps.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/react-say/lib/migrateDeprecatedProps.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = migrateDeprecatedProps;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutProperties.js"));
+
+var _Say = _interopRequireDefault(__webpack_require__(/*! ./Say */ "./node_modules/react-say/lib/Say.js"));
+
+var _SayButton = _interopRequireDefault(__webpack_require__(/*! ./SayButton */ "./node_modules/react-say/lib/SayButton.js"));
+
+var _excluded = ["ponyfill", "speak", "speechSynthesis", "speechSynthesisUtterance", "text"];
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var warnings = {
+  ponyfill: true,
+  saySpeak: true
+};
+
+function migrateDeprecatedProps(_ref, componentType) {
+  var ponyfill = _ref.ponyfill,
+      speak = _ref.speak,
+      speechSynthesis = _ref.speechSynthesis,
+      speechSynthesisUtterance = _ref.speechSynthesisUtterance,
+      text = _ref.text,
+      otherProps = (0, _objectWithoutProperties2["default"])(_ref, _excluded);
+
+  if (!ponyfill && (speechSynthesis || speechSynthesisUtterance)) {
+    if (warnings.ponyfill) {
+      console.warn('react-say: "speechSynthesis" and "speechSynthesisUtterance" props has been renamed to "ponyfill". Please update your code. The deprecated props will be removed in version >= 3.0.0.');
+      warnings.ponyfill = false;
+    }
+
+    ponyfill = {
+      speechSynthesis: speechSynthesis,
+      SpeechSynthesisUtterance: speechSynthesisUtterance
+    };
+  }
+
+  if (componentType === _Say["default"] || componentType === _SayButton["default"]) {
+    if (speak && !text) {
+      if (warnings.saySpeak) {
+        console.warn('react-say: "speak" prop has been renamed to "text". Please update your code. The deprecated props will be removed in version >= 3.0.0.');
+        warnings.saySpeak = false;
+      }
+
+      text = speak;
+    }
+  }
+
+  return _objectSpread({
+    ponyfill: ponyfill,
+    text: text
+  }, otherProps);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9taWdyYXRlRGVwcmVjYXRlZFByb3BzLmpzIl0sIm5hbWVzIjpbIndhcm5pbmdzIiwicG9ueWZpbGwiLCJzYXlTcGVhayIsIm1pZ3JhdGVEZXByZWNhdGVkUHJvcHMiLCJjb21wb25lbnRUeXBlIiwic3BlYWsiLCJzcGVlY2hTeW50aGVzaXMiLCJzcGVlY2hTeW50aGVzaXNVdHRlcmFuY2UiLCJ0ZXh0Iiwib3RoZXJQcm9wcyIsImNvbnNvbGUiLCJ3YXJuIiwiU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlIiwiU2F5IiwiU2F5QnV0dG9uIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7O0FBQUE7O0FBQ0E7Ozs7Ozs7O0FBRUEsSUFBTUEsUUFBUSxHQUFHO0FBQ2ZDLEVBQUFBLFFBQVEsRUFBRSxJQURLO0FBRWZDLEVBQUFBLFFBQVEsRUFBRTtBQUZLLENBQWpCOztBQUtlLFNBQVNDLHNCQUFULE9BU2JDLGFBVGEsRUFVYjtBQUFBLE1BUkVILFFBUUYsUUFSRUEsUUFRRjtBQUFBLE1BUEVJLEtBT0YsUUFQRUEsS0FPRjtBQUFBLE1BTkVDLGVBTUYsUUFORUEsZUFNRjtBQUFBLE1BTEVDLHdCQUtGLFFBTEVBLHdCQUtGO0FBQUEsTUFKRUMsSUFJRixRQUpFQSxJQUlGO0FBQUEsTUFIS0MsVUFHTDs7QUFDQSxNQUNFLENBQUNSLFFBQUQsS0FDSUssZUFBZSxJQUFJQyx3QkFEdkIsQ0FERixFQUdFO0FBQ0EsUUFBSVAsUUFBUSxDQUFDQyxRQUFiLEVBQXVCO0FBQ3JCUyxNQUFBQSxPQUFPLENBQUNDLElBQVIsQ0FBYSxzTEFBYjtBQUVBWCxNQUFBQSxRQUFRLENBQUNDLFFBQVQsR0FBb0IsS0FBcEI7QUFDRDs7QUFFREEsSUFBQUEsUUFBUSxHQUFHO0FBQ1RLLE1BQUFBLGVBQWUsRUFBZkEsZUFEUztBQUVUTSxNQUFBQSx3QkFBd0IsRUFBRUw7QUFGakIsS0FBWDtBQUlEOztBQUVELE1BQUlILGFBQWEsS0FBS1MsZUFBbEIsSUFBeUJULGFBQWEsS0FBS1UscUJBQS9DLEVBQTBEO0FBQ3hELFFBQUlULEtBQUssSUFBSSxDQUFDRyxJQUFkLEVBQW9CO0FBQ2xCLFVBQUlSLFFBQVEsQ0FBQ0UsUUFBYixFQUF1QjtBQUNyQlEsUUFBQUEsT0FBTyxDQUFDQyxJQUFSLENBQWEsd0lBQWI7QUFFQVgsUUFBQUEsUUFBUSxDQUFDRSxRQUFULEdBQW9CLEtBQXBCO0FBQ0Q7O0FBRURNLE1BQUFBLElBQUksR0FBR0gsS0FBUDtBQUNEO0FBQ0Y7O0FBRUQ7QUFDRUosSUFBQUEsUUFBUSxFQUFSQSxRQURGO0FBRUVPLElBQUFBLElBQUksRUFBSkE7QUFGRixLQUdLQyxVQUhMO0FBS0QiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgU2F5IGZyb20gJy4vU2F5JztcbmltcG9ydCBTYXlCdXR0b24gZnJvbSAnLi9TYXlCdXR0b24nO1xuXG5jb25zdCB3YXJuaW5ncyA9IHtcbiAgcG9ueWZpbGw6IHRydWUsXG4gIHNheVNwZWFrOiB0cnVlXG59O1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBtaWdyYXRlRGVwcmVjYXRlZFByb3BzKFxuICB7XG4gICAgcG9ueWZpbGwsXG4gICAgc3BlYWssXG4gICAgc3BlZWNoU3ludGhlc2lzLFxuICAgIHNwZWVjaFN5bnRoZXNpc1V0dGVyYW5jZSxcbiAgICB0ZXh0LFxuICAgIC4uLm90aGVyUHJvcHNcbiAgfSxcbiAgY29tcG9uZW50VHlwZVxuKSB7XG4gIGlmIChcbiAgICAhcG9ueWZpbGxcbiAgICAmJiAoc3BlZWNoU3ludGhlc2lzIHx8IHNwZWVjaFN5bnRoZXNpc1V0dGVyYW5jZSlcbiAgKSB7XG4gICAgaWYgKHdhcm5pbmdzLnBvbnlmaWxsKSB7XG4gICAgICBjb25zb2xlLndhcm4oJ3JlYWN0LXNheTogXCJzcGVlY2hTeW50aGVzaXNcIiBhbmQgXCJzcGVlY2hTeW50aGVzaXNVdHRlcmFuY2VcIiBwcm9wcyBoYXMgYmVlbiByZW5hbWVkIHRvIFwicG9ueWZpbGxcIi4gUGxlYXNlIHVwZGF0ZSB5b3VyIGNvZGUuIFRoZSBkZXByZWNhdGVkIHByb3BzIHdpbGwgYmUgcmVtb3ZlZCBpbiB2ZXJzaW9uID49IDMuMC4wLicpO1xuXG4gICAgICB3YXJuaW5ncy5wb255ZmlsbCA9IGZhbHNlO1xuICAgIH1cblxuICAgIHBvbnlmaWxsID0ge1xuICAgICAgc3BlZWNoU3ludGhlc2lzLFxuICAgICAgU3BlZWNoU3ludGhlc2lzVXR0ZXJhbmNlOiBzcGVlY2hTeW50aGVzaXNVdHRlcmFuY2VcbiAgICB9O1xuICB9XG5cbiAgaWYgKGNvbXBvbmVudFR5cGUgPT09IFNheSB8fCBjb21wb25lbnRUeXBlID09PSBTYXlCdXR0b24pIHtcbiAgICBpZiAoc3BlYWsgJiYgIXRleHQpIHtcbiAgICAgIGlmICh3YXJuaW5ncy5zYXlTcGVhaykge1xuICAgICAgICBjb25zb2xlLndhcm4oJ3JlYWN0LXNheTogXCJzcGVha1wiIHByb3AgaGFzIGJlZW4gcmVuYW1lZCB0byBcInRleHRcIi4gUGxlYXNlIHVwZGF0ZSB5b3VyIGNvZGUuIFRoZSBkZXByZWNhdGVkIHByb3BzIHdpbGwgYmUgcmVtb3ZlZCBpbiB2ZXJzaW9uID49IDMuMC4wLicpO1xuXG4gICAgICAgIHdhcm5pbmdzLnNheVNwZWFrID0gZmFsc2U7XG4gICAgICB9XG5cbiAgICAgIHRleHQgPSBzcGVhaztcbiAgICB9XG4gIH1cblxuICByZXR1cm4ge1xuICAgIHBvbnlmaWxsLFxuICAgIHRleHQsXG4gICAgLi4ub3RoZXJQcm9wc1xuICB9O1xufVxuIl19
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/useEvent.js":
+/*!************************************************!*\
+  !*** ./node_modules/react-say/lib/useEvent.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = useEvent;
+
+var _useImmediateEffect = _interopRequireDefault(__webpack_require__(/*! ./useImmediateEffect */ "./node_modules/react-say/lib/useImmediateEffect.js"));
+
+function useEvent(target, name, listener, options) {
+  (0, _useImmediateEffect["default"])(function () {
+    var handler = function handler(event) {
+      return listener && listener(event);
+    };
+
+    target.addEventListener(name, handler, options);
+    return function () {
+      // It seems speechSynthesis.onvoiceschanged still fire after we called removeEventListener.
+      // We are protecting this scenario by setting listener to falsy.
+      listener = null;
+      target.removeEventListener(name, handler, options);
+    };
+  }, [listener, name, options, target]);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy91c2VFdmVudC5qcyJdLCJuYW1lcyI6WyJ1c2VFdmVudCIsInRhcmdldCIsIm5hbWUiLCJsaXN0ZW5lciIsIm9wdGlvbnMiLCJoYW5kbGVyIiwiZXZlbnQiLCJhZGRFdmVudExpc3RlbmVyIiwicmVtb3ZlRXZlbnRMaXN0ZW5lciJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7O0FBRWUsU0FBU0EsUUFBVCxDQUFrQkMsTUFBbEIsRUFBMEJDLElBQTFCLEVBQWdDQyxRQUFoQyxFQUEwQ0MsT0FBMUMsRUFBbUQ7QUFDaEUsc0NBQW1CLFlBQU07QUFDdkIsUUFBTUMsT0FBTyxHQUFHLFNBQVZBLE9BQVUsQ0FBQUMsS0FBSztBQUFBLGFBQUlILFFBQVEsSUFBSUEsUUFBUSxDQUFDRyxLQUFELENBQXhCO0FBQUEsS0FBckI7O0FBRUFMLElBQUFBLE1BQU0sQ0FBQ00sZ0JBQVAsQ0FBd0JMLElBQXhCLEVBQThCRyxPQUE5QixFQUF1Q0QsT0FBdkM7QUFFQSxXQUFPLFlBQU07QUFDWDtBQUNBO0FBQ0FELE1BQUFBLFFBQVEsR0FBRyxJQUFYO0FBQ0FGLE1BQUFBLE1BQU0sQ0FBQ08sbUJBQVAsQ0FBMkJOLElBQTNCLEVBQWlDRyxPQUFqQyxFQUEwQ0QsT0FBMUM7QUFDRCxLQUxEO0FBTUQsR0FYRCxFQVdHLENBQUNELFFBQUQsRUFBV0QsSUFBWCxFQUFpQkUsT0FBakIsRUFBMEJILE1BQTFCLENBWEg7QUFZRCIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB1c2VJbW1lZGlhdGVFZmZlY3QgZnJvbSAnLi91c2VJbW1lZGlhdGVFZmZlY3QnO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiB1c2VFdmVudCh0YXJnZXQsIG5hbWUsIGxpc3RlbmVyLCBvcHRpb25zKSB7XG4gIHVzZUltbWVkaWF0ZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3QgaGFuZGxlciA9IGV2ZW50ID0+IGxpc3RlbmVyICYmIGxpc3RlbmVyKGV2ZW50KTtcblxuICAgIHRhcmdldC5hZGRFdmVudExpc3RlbmVyKG5hbWUsIGhhbmRsZXIsIG9wdGlvbnMpO1xuXG4gICAgcmV0dXJuICgpID0+IHtcbiAgICAgIC8vIEl0IHNlZW1zIHNwZWVjaFN5bnRoZXNpcy5vbnZvaWNlc2NoYW5nZWQgc3RpbGwgZmlyZSBhZnRlciB3ZSBjYWxsZWQgcmVtb3ZlRXZlbnRMaXN0ZW5lci5cbiAgICAgIC8vIFdlIGFyZSBwcm90ZWN0aW5nIHRoaXMgc2NlbmFyaW8gYnkgc2V0dGluZyBsaXN0ZW5lciB0byBmYWxzeS5cbiAgICAgIGxpc3RlbmVyID0gbnVsbDtcbiAgICAgIHRhcmdldC5yZW1vdmVFdmVudExpc3RlbmVyKG5hbWUsIGhhbmRsZXIsIG9wdGlvbnMpO1xuICAgIH07XG4gIH0sIFtsaXN0ZW5lciwgbmFtZSwgb3B0aW9ucywgdGFyZ2V0XSk7XG59XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/useImmediateEffect.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/react-say/lib/useImmediateEffect.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = useImmediateEffect;
+
+var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+function useImmediateEffect(fn, deps) {
+  var unsubscribeRef = (0, _react.useRef)({
+    first: true,
+    id: Math.random().toString(36).substr(2, 5),
+    unsubscribe: fn()
+  });
+  (0, _react.useEffect)(function () {
+    var current = unsubscribeRef.current;
+
+    if (!current.first) {
+      current.unsubscribe = fn();
+    } else {
+      current.first = false;
+    }
+
+    return function () {
+      current.unsubscribe && current.unsubscribe();
+      current.unsubscribe = null;
+    };
+  }, deps);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy91c2VJbW1lZGlhdGVFZmZlY3QuanMiXSwibmFtZXMiOlsidXNlSW1tZWRpYXRlRWZmZWN0IiwiZm4iLCJkZXBzIiwidW5zdWJzY3JpYmVSZWYiLCJmaXJzdCIsImlkIiwiTWF0aCIsInJhbmRvbSIsInRvU3RyaW5nIiwic3Vic3RyIiwidW5zdWJzY3JpYmUiLCJjdXJyZW50Il0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBQUE7O0FBRWUsU0FBU0Esa0JBQVQsQ0FBNEJDLEVBQTVCLEVBQWdDQyxJQUFoQyxFQUFzQztBQUNuRCxNQUFNQyxjQUFjLEdBQUcsbUJBQU87QUFDNUJDLElBQUFBLEtBQUssRUFBRSxJQURxQjtBQUU1QkMsSUFBQUEsRUFBRSxFQUFFQyxJQUFJLENBQUNDLE1BQUwsR0FBY0MsUUFBZCxDQUF1QixFQUF2QixFQUEyQkMsTUFBM0IsQ0FBa0MsQ0FBbEMsRUFBcUMsQ0FBckMsQ0FGd0I7QUFHNUJDLElBQUFBLFdBQVcsRUFBRVQsRUFBRTtBQUhhLEdBQVAsQ0FBdkI7QUFNQSx3QkFBVSxZQUFNO0FBQ2QsUUFBUVUsT0FBUixHQUFvQlIsY0FBcEIsQ0FBUVEsT0FBUjs7QUFFQSxRQUFJLENBQUNBLE9BQU8sQ0FBQ1AsS0FBYixFQUFvQjtBQUNsQk8sTUFBQUEsT0FBTyxDQUFDRCxXQUFSLEdBQXNCVCxFQUFFLEVBQXhCO0FBQ0QsS0FGRCxNQUVPO0FBQ0xVLE1BQUFBLE9BQU8sQ0FBQ1AsS0FBUixHQUFnQixLQUFoQjtBQUNEOztBQUVELFdBQU8sWUFBTTtBQUNYTyxNQUFBQSxPQUFPLENBQUNELFdBQVIsSUFBdUJDLE9BQU8sQ0FBQ0QsV0FBUixFQUF2QjtBQUNBQyxNQUFBQSxPQUFPLENBQUNELFdBQVIsR0FBc0IsSUFBdEI7QUFDRCxLQUhEO0FBSUQsR0FiRCxFQWFHUixJQWJIO0FBY0QiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVJlZiB9IGZyb20gJ3JlYWN0JztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gdXNlSW1tZWRpYXRlRWZmZWN0KGZuLCBkZXBzKSB7XG4gIGNvbnN0IHVuc3Vic2NyaWJlUmVmID0gdXNlUmVmKHtcbiAgICBmaXJzdDogdHJ1ZSxcbiAgICBpZDogTWF0aC5yYW5kb20oKS50b1N0cmluZygzNikuc3Vic3RyKDIsIDUpLFxuICAgIHVuc3Vic2NyaWJlOiBmbigpXG4gIH0pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3QgeyBjdXJyZW50IH0gPSB1bnN1YnNjcmliZVJlZjtcblxuICAgIGlmICghY3VycmVudC5maXJzdCkge1xuICAgICAgY3VycmVudC51bnN1YnNjcmliZSA9IGZuKCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIGN1cnJlbnQuZmlyc3QgPSBmYWxzZTtcbiAgICB9XG5cbiAgICByZXR1cm4gKCkgPT4ge1xuICAgICAgY3VycmVudC51bnN1YnNjcmliZSAmJiBjdXJyZW50LnVuc3Vic2NyaWJlKCk7XG4gICAgICBjdXJyZW50LnVuc3Vic2NyaWJlID0gbnVsbDtcbiAgICB9O1xuICB9LCBkZXBzKTtcbn1cbiJdfQ==
+
+/***/ }),
+
+/***/ "./node_modules/react-say/lib/useSynthesize.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/react-say/lib/useSynthesize.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = useSynthesize;
+
+var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var _Context = _interopRequireDefault(__webpack_require__(/*! ./Context */ "./node_modules/react-say/lib/Context.js"));
+
+var _createNativeUtterance = _interopRequireDefault(__webpack_require__(/*! ./createNativeUtterance */ "./node_modules/react-say/lib/createNativeUtterance.js"));
+
+function useSynthesize() {
+  var _useContext = (0, _react.useContext)(_Context["default"]),
+      ponyfill = _useContext.ponyfill,
+      synthesize = _useContext.synthesize;
+
+  return function (utteranceOrText, progressFn) {
+    if (typeof utteranceOrText === 'string') {
+      utteranceOrText = (0, _createNativeUtterance["default"])(ponyfill, {
+        text: utteranceOrText
+      });
+    }
+
+    return synthesize(ponyfill, utteranceOrText, {
+      onStart: progressFn && function () {
+        return progressFn();
+      }
+    });
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy91c2VTeW50aGVzaXplLmpzIl0sIm5hbWVzIjpbInVzZVN5bnRoZXNpemUiLCJDb250ZXh0IiwicG9ueWZpbGwiLCJzeW50aGVzaXplIiwidXR0ZXJhbmNlT3JUZXh0IiwicHJvZ3Jlc3NGbiIsInRleHQiLCJvblN0YXJ0Il0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQTs7QUFFQTs7QUFDQTs7QUFFZSxTQUFTQSxhQUFULEdBQXlCO0FBQ3RDLG9CQUFpQyx1QkFBV0MsbUJBQVgsQ0FBakM7QUFBQSxNQUFRQyxRQUFSLGVBQVFBLFFBQVI7QUFBQSxNQUFrQkMsVUFBbEIsZUFBa0JBLFVBQWxCOztBQUVBLFNBQU8sVUFBQ0MsZUFBRCxFQUFrQkMsVUFBbEIsRUFBaUM7QUFDdEMsUUFBSSxPQUFPRCxlQUFQLEtBQTJCLFFBQS9CLEVBQXlDO0FBQ3ZDQSxNQUFBQSxlQUFlLEdBQUcsdUNBQXNCRixRQUF0QixFQUFnQztBQUFFSSxRQUFBQSxJQUFJLEVBQUVGO0FBQVIsT0FBaEMsQ0FBbEI7QUFDRDs7QUFFRCxXQUFPRCxVQUFVLENBQUNELFFBQUQsRUFBV0UsZUFBWCxFQUE0QjtBQUFFRyxNQUFBQSxPQUFPLEVBQUVGLFVBQVUsSUFBSztBQUFBLGVBQU1BLFVBQVUsRUFBaEI7QUFBQTtBQUExQixLQUE1QixDQUFqQjtBQUNELEdBTkQ7QUFPRCIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZUNvbnRleHQgfSBmcm9tICdyZWFjdCc7XG5cbmltcG9ydCBDb250ZXh0IGZyb20gJy4vQ29udGV4dCc7XG5pbXBvcnQgY3JlYXRlTmF0aXZlVXR0ZXJhbmNlIGZyb20gJy4vY3JlYXRlTmF0aXZlVXR0ZXJhbmNlJztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gdXNlU3ludGhlc2l6ZSgpIHtcbiAgY29uc3QgeyBwb255ZmlsbCwgc3ludGhlc2l6ZSB9ID0gdXNlQ29udGV4dChDb250ZXh0KTtcblxuICByZXR1cm4gKHV0dGVyYW5jZU9yVGV4dCwgcHJvZ3Jlc3NGbikgPT4ge1xuICAgIGlmICh0eXBlb2YgdXR0ZXJhbmNlT3JUZXh0ID09PSAnc3RyaW5nJykge1xuICAgICAgdXR0ZXJhbmNlT3JUZXh0ID0gY3JlYXRlTmF0aXZlVXR0ZXJhbmNlKHBvbnlmaWxsLCB7IHRleHQ6IHV0dGVyYW5jZU9yVGV4dCB9KTtcbiAgICB9XG5cbiAgICByZXR1cm4gc3ludGhlc2l6ZShwb255ZmlsbCwgdXR0ZXJhbmNlT3JUZXh0LCB7IG9uU3RhcnQ6IHByb2dyZXNzRm4gJiYgKCgpID0+IHByb2dyZXNzRm4oKSkgfSk7XG4gIH07XG59XG4iXX0=
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayLikeToArray.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayLikeToArray.js ***!
+  \****************************************************************************************/
+/***/ ((module) => {
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithHoles.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
+  \**************************************************************************************/
+/***/ ((module) => {
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+module.exports = _arrayWithHoles;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":
+/*!*****************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithoutHoles.js ***!
+  \*****************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayLikeToArray.js");
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/asyncToGenerator.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
+  \****************************************************************************************/
+/***/ ((module) => {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+module.exports = _asyncToGenerator;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/classCallCheck.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/classCallCheck.js ***!
+  \**************************************************************************************/
+/***/ ((module) => {
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+module.exports = _classCallCheck;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/createClass.js":
+/*!***********************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/createClass.js ***!
+  \***********************************************************************************/
+/***/ ((module) => {
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/defineProperty.js":
+/*!**************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/defineProperty.js ***!
+  \**************************************************************************************/
+/***/ ((module) => {
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+module.exports = _defineProperty;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js":
+/*!*********************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
+  \*********************************************************************************************/
+/***/ ((module) => {
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+
+module.exports = _interopRequireDefault;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArray.js":
+/*!***************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArray.js ***!
+  \***************************************************************************************/
+/***/ ((module) => {
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":
+/*!********************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArrayLimit.js ***!
+  \********************************************************************************************/
+/***/ ((module) => {
+
+function _iterableToArrayLimit(arr, i) {
+  var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+
+  if (_i == null) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+
+  var _s, _e;
+
+  try {
+    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableRest.js":
+/*!***************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableRest.js ***!
+  \***************************************************************************************/
+/***/ ((module) => {
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableSpread.js":
+/*!*****************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableSpread.js ***!
+  \*****************************************************************************************/
+/***/ ((module) => {
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutProperties.js":
+/*!***********************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutProperties.js ***!
+  \***********************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var objectWithoutPropertiesLoose = __webpack_require__(/*! ./objectWithoutPropertiesLoose.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js");
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
+module.exports = _objectWithoutProperties;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js":
+/*!****************************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js ***!
+  \****************************************************************************************************/
+/***/ ((module) => {
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+module.exports = _objectWithoutPropertiesLoose;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/readOnlyError.js":
+/*!*************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/readOnlyError.js ***!
+  \*************************************************************************************/
+/***/ ((module) => {
+
+function _readOnlyError(name) {
+  throw new TypeError("\"" + name + "\" is read-only");
+}
+
+module.exports = _readOnlyError;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/slicedToArray.js":
+/*!*************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/slicedToArray.js ***!
+  \*************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayWithHoles = __webpack_require__(/*! ./arrayWithHoles.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithHoles.js");
+
+var iterableToArrayLimit = __webpack_require__(/*! ./iterableToArrayLimit.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArrayLimit.js");
+
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js");
+
+var nonIterableRest = __webpack_require__(/*! ./nonIterableRest.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableRest.js");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/toConsumableArray.js":
+/*!*****************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
+  \*****************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayWithoutHoles.js");
+
+var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/iterableToArray.js");
+
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js");
+
+var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/nonIterableSpread.js");
+
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/typeof.js ***!
+  \******************************************************************************/
+/***/ ((module) => {
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    module.exports = _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
+  } else {
+    module.exports = _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
+  }
+
+  return _typeof(obj);
+}
+
+module.exports = _typeof;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":
+/*!**************************************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js ***!
+  \**************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ "./node_modules/react-say/node_modules/@babel/runtime/helpers/arrayLikeToArray.js");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+
+/***/ }),
+
+/***/ "./node_modules/react-say/node_modules/@babel/runtime/regenerator/index.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/react-say/node_modules/@babel/runtime/regenerator/index.js ***!
+  \*********************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/regenerator-runtime/runtime.js");
+
+
+/***/ }),
+
 /***/ "./node_modules/react/cjs/react.development.js":
 /*!*****************************************************!*\
   !*** ./node_modules/react/cjs/react.development.js ***!
@@ -35824,6 +37586,770 @@ if ( true && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed
 }
 
 
+
+
+/***/ }),
+
+/***/ "./node_modules/regenerator-runtime/runtime.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/regenerator-runtime/runtime.js ***!
+  \*****************************************************/
+/***/ ((module) => {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  define(Gp, "constructor", GeneratorFunctionPrototype);
+  define(GeneratorFunctionPrototype, "constructor", GeneratorFunction);
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+   true ? module.exports : 0
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
 
 
 /***/ }),
@@ -39433,7 +41959,6 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-var __webpack_exports__ = {};
 /*!*************************!*\
   !*** ./client/index.js ***!
   \*************************/
@@ -39453,17 +41978,6 @@ document.addEventListener('DOMContentLoaded', () => {
     store: _store__WEBPACK_IMPORTED_MODULE_3__["default"]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_components_App__WEBPACK_IMPORTED_MODULE_4__["default"], null)), document.getElementById('app'));
 });
-})();
-
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-/*!**********************************!*\
-  !*** ./client/styles/index.scss ***!
-  \**********************************/
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
 })();
 
 /******/ })()
