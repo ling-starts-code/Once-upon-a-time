@@ -298,14 +298,20 @@ __webpack_require__.r(__webpack_exports__);
 
 function WholeStory() {
   const arr = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.paragraphies);
-  console.log(arr);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, arr.map(item => {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_say__WEBPACK_IMPORTED_MODULE_2__.SayButton, {
-      key: item.id,
-      onClick: event => console.log(event),
-      speak: item.post
-    }));
-  }), "Tell me a story");
+  console.log('arr on line 7 ', arr);
+  const story = arr.reduce((item, current) => {
+    console.log('current post: ', current.post);
+    return item + ' ' + current.post;
+  }, '');
+  console.log('line 13 story ', story);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, arr.map(item => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("p", {
+      key: item.id
+    }, item.post);
+  }), story && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_say__WEBPACK_IMPORTED_MODULE_2__.SayButton, {
+    onClick: event => console.log(event),
+    speak: story
+  }, "Read Me")));
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WholeStory);
